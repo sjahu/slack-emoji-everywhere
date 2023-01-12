@@ -50,6 +50,7 @@ There are many things left to do to make this usable, some of which are tagged w
 
 Other ideas:
 
+- Add support for non-custom emoji (the Slack client downloads a big blob of all their names rather than getting them through the search API).
 - Re-run the logic in the non-Slack content script when the page content is updated
 - Add a setting to enable emojification on a per-site basis
 - Implement an emoji picker for editible text, like Slack's (use the `emoji/search` API)
