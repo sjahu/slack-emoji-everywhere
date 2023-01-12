@@ -1,0 +1,52 @@
+{
+  "manifest_version": 2,
+  "name": "slack-emoji-everywhere",
+  "version": "0.0.1",
+  "description": "Bring slack emoji everywhere, where they belong",
+  "homepage_url": "https://github.com/sjahu/slack-emoji-everywhere",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "slackemojieverywhere@shumphries.ca"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://app.slack.com/*"
+      ],
+      "js": [
+        "slack.js"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "file:///*" // TODO: load content script on other sites
+      ],
+      "exclude_matches": [
+        "https://app.slack.com/*"
+      ],
+      "js": [
+        "not-slack.js"
+      ],
+      "css": [
+        "slack-emoji-everywhere.css"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "background": {
+    "scripts": [
+      "background.js"
+    ],
+    "persistent": false
+  },
+  "options_ui": {
+    "page": "options.html",
+    "browser_style": true
+  },
+  "permissions": [
+    "storage",
+    "https://*.slack.com/*"
+  ]
+}
