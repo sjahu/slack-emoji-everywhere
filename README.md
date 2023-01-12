@@ -44,6 +44,10 @@ becomes...
 
 ![](demo.png)
 
+A post on Workplace:
+
+![](demo2.png)
+
 ## To do
 
 There are many things left to do to make this usable, some of which are tagged with `TODO` in the code.
