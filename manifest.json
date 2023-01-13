@@ -18,22 +18,22 @@
         "slack.js"
       ],
       "run_at": "document_idle"
-    },
-    {
-      "matches": [
-        "file:///*" // TODO: load content script on other sites
-      ],
-      "exclude_matches": [
-        "https://app.slack.com/*"
-      ],
-      "js": [
-        "not-slack.js"
-      ],
-      "css": [
-        "slack-emoji-everywhere.css"
-      ],
-      "run_at": "document_idle"
-    }
+    } //,
+    // {
+    //   "matches": [
+    //     "file:///*" // TODO: load content script on other sites
+    //   ],
+    //   "exclude_matches": [
+    //     "https://app.slack.com/*"
+    //   ],
+    //   "js": [
+    //     "not-slack.js"
+    //   ],
+    //   "css": [
+    //     "slack-emoji-everywhere.css"
+    //   ],
+    //   "run_at": "document_idle"
+    // }
   ],
   "background": {
     "scripts": [
@@ -47,5 +47,8 @@
   "permissions": [
     "storage",
     "https://*.slack.com/*"
+  ],
+  "optional_permissions": [
+    "<all_urls>"
   ]
 }
