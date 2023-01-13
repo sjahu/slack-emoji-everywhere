@@ -1,7 +1,7 @@
 const emojiUrlRegex = /https:\/\/[a-zA-Z0-9_\-\/.]+/
 
 browser.storage.local.get(["slackConfig", "selectedTeamId"]).then((item) => {
-  let team = item.slackConfig.teams[item.selectedTeamId];
+  let team = item.slackConfig?.teams[item.selectedTeamId];
   if (team) {
     browser.runtime.onMessage.addListener((request) => {
       if (request.type === "getEmoji") {
