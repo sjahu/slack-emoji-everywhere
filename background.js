@@ -22,7 +22,6 @@ browser.storage.local.get(["slackConfig", "selectedTeamId"]).then((item) => {
             }
           });
 
-          console.log(results);
           return results;
         });
       }
