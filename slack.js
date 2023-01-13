@@ -1,15 +1,9 @@
+// Copy Slack's config to the extension's local storage so the other extension scripts can read it
+browser.storage.local.set({ slackConfig: JSON.parse(localStorage.localConfig_v2) });
 
-// Thanks to https://github.com/jackellenberger/emojme/blob/8c6e2caa1ec5ca66f0be26c424c0e0aeaef6cf4c/README.md#cookie-token-one-liner for the pointer to localConfig_v2
-browser.storage.local.get("slackWorkspaceUrl").then(
-  (item) => {
-    let team = Object.values(
-      JSON.parse(localStorage.localConfig_v2 || "{}").teams || {}
-    ).find(
-      (team) => team.url === item.slackWorkspaceUrl
-    );
-
-    if (team) {
-      browser.storage.local.set({ slackTeam: team });
-    }
+// Default the selected workspace to the active one
+browser.storage.local.get("selectedTeamId").then((item) => {
+  if (!item.selectedTeamId) {
+    browser.storage.local.set({ selectedTeamId: JSON.parse(localStorage.localConfig_v2).lastActiveTeamId });
   }
-);
+});
