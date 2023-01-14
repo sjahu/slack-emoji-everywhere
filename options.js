@@ -1,3 +1,5 @@
+import { get_user_added_match_patterns } from "./optional_host_permissions.js";
+
 browser.storage.local.get(["slackConfig", "selectedTeamId"]).then((item) => {
   if (item.slackConfig) {
     let teams = Object.values(item.slackConfig.teams).sort((a, b) => a.name.localeCompare(b.name));
@@ -27,23 +29,16 @@ browser.storage.local.get(["slackConfig", "selectedTeamId"]).then((item) => {
   }
 });
 
-
-browser.permissions.getAll().then((permissions) => {
-  let manifest = browser.runtime.getManifest();
-  let optional_origins = permissions.origins.filter(
-    (origin) => !manifest.permissions.includes(origin) &&
-      !manifest.content_scripts.flatMap((content_script) => content_script.matches).includes(origin)
-  );
-
-  document.querySelector("#match-patterns").innerHTML = optional_origins.map((origin) => `
+get_user_added_match_patterns().then((patterns) => {
+  document.querySelector("#match-patterns").innerHTML = patterns.map((pattern) => `
     <li>
-      <div class="match-pattern"><code>${origin.replace("<all_urls>", "&lt;all_urls&gt;")}</code></div><input type="button" class="match-pattern-delete-button" value="Remove" data-origin="${origin}">
+      <div class="match-pattern"><code>${pattern.replace("<all_urls>", "&lt;all_urls&gt;")}</code></div><input type="button" class="match-pattern-delete-button" value="Remove" data-pattern="${pattern}">
     </li>
   `).join("");
 
   document.querySelectorAll(".match-pattern-delete-button").forEach((input) => {
     input.addEventListener("click", () => {
-      browser.permissions.remove({ origins: [input.dataset.origin] }).then((success) => {
+      browser.permissions.remove({ origins: [input.dataset.pattern] }).then((success) => {
         if (success) {
           browser.runtime.reload();
         }
@@ -51,7 +46,6 @@ browser.permissions.getAll().then((permissions) => {
     })
   });
 });
-
 
 document.querySelector("#match-pattern-add-button").addEventListener("click", () => {
   try {
