@@ -1,4 +1,4 @@
-const emojiRegex = /:([a-z0-9_\-]+):/g;
+const emojiRegex = /:([a-z0-9_\-]{1,100}):/g;
 
 let emojiNames = new Set();
 
