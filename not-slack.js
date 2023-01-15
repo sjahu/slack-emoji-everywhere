@@ -1,4 +1,4 @@
-const emojiRegex = /:([a-z0-9_\-]{1,100}):/g;
+const emojiRegex = /:(?<name>[a-z0-9_\-]{1,100}):/g;
 
 let emojiNames = new Set();
 
@@ -20,15 +20,27 @@ while (node = nodeIterator.nextNode()) {
 //       there doesn't appear to be a limit on the number of emojis per call, but there's a 10 000 byte limit on the size of the request body
 browser.runtime.sendMessage({ type: "getEmoji", emojiNames: [...emojiNames] }).then((emojiUrls) => {
   for (const node of nodes) {
-    let newNodeParent = document.createElement("div");
+    let childNodes = node.textContent.split(emojiRegex).map((substring, i) => {
+      // When split is called with a regex containing a capture group, the capture group
+      // values are spliced into the array. Annoying, but we can work with it...
+      if (i % 2) { // odd substrings are emoji matches
+        if (emojiUrls[substring]) {
+          let imgElement = document.createElement("img");
+          imgElement.setAttribute("class", "slack-emoji-everywhere");
+          imgElement.setAttribute("src", emojiUrls[substring]);
+          imgElement.setAttribute("title", substring);
+          imgElement.setAttribute("alt", `:${substring}:`);
 
-    newNodeParent.innerHTML = node.textContent.replaceAll(emojiRegex, (match, name) => {
-      if (emojiUrls[name]) {
-        return `<img class="slack-emoji-everywhere" src="${emojiUrls[name]}" alt=":${name}:" title="${name}">`;
+          return imgElement;
+        } else {
+          return document.createTextNode(`:${substring}:`);
+        }
+      } else { // even substrings are normal text
+        return document.createTextNode(substring);
       }
-      return match;
     });
 
-    node.replaceWith(...newNodeParent.childNodes);
+    node.replaceWith(...childNodes);
+    node.normalize();
   }
 });

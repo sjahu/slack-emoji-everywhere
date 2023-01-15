@@ -1,6 +1,6 @@
 import { get_user_added_match_patterns } from "./optional_host_permissions.js";
 
-const emojiUrlRegex = /https:\/\/[a-zA-Z0-9_\-\/.]+/
+const emojiUrlRegex = /^https:\/\/[a-zA-Z0-9_\-\/.]+$/
 
 browser.storage.local.get(["slackConfig", "selectedTeamId"]).then((item) => {
   let team = item.slackConfig?.teams[item.selectedTeamId];
@@ -18,9 +18,10 @@ browser.storage.local.get(["slackConfig", "selectedTeamId"]).then((item) => {
           })
         }).then((response) => response.json()).then((data) => {
           let results = {};
-          data.results.forEach(element => {
-            if (element.value.match(emojiUrlRegex)) {
-              results[element.name] = element.value;
+          data.results.forEach(emojiResult => {
+            // Make sure the emoji URL string is actually a URL before passing it to the content script
+            if (emojiResult.value.match(emojiUrlRegex)) {
+              results[emojiResult.name] = emojiResult.value;
             }
           });
 
