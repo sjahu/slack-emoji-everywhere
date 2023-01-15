@@ -1,3 +1,5 @@
+import { get_user_added_match_patterns } from "./optional_host_permissions.js";
+
 browser.storage.local.get(["slackConfig", "selectedTeamId"]).then((item) => {
   if (item.slackConfig) {
     let teams = Object.values(item.slackConfig.teams).sort((a, b) => a.name.localeCompare(b.name));
@@ -24,5 +26,36 @@ browser.storage.local.get(["slackConfig", "selectedTeamId"]).then((item) => {
         browser.runtime.reload();
       }));
     }
+  }
+});
+
+get_user_added_match_patterns().then((patterns) => {
+  document.querySelector("#match-patterns").innerHTML = patterns.map((pattern) => `
+    <li>
+      <div class="match-pattern"><code>${pattern.replace("<all_urls>", "&lt;all_urls&gt;")}</code></div><input type="button" class="match-pattern-delete-button" value="Remove" data-pattern="${pattern}">
+    </li>
+  `).join("");
+
+  document.querySelectorAll(".match-pattern-delete-button").forEach((input) => {
+    input.addEventListener("click", () => {
+      browser.permissions.remove({ origins: [input.dataset.pattern] }).then((success) => {
+        if (success) {
+          browser.runtime.reload();
+        }
+      });
+    })
+  });
+});
+
+document.querySelector("#match-pattern-add-button").addEventListener("click", () => {
+  try {
+    browser.permissions.request({ origins: [document.querySelector("#match-pattern-input").value] }).then((success) => {
+      if (success) {
+        document.querySelector("#match-pattern-input").value = "";
+        browser.runtime.reload();
+      }
+    });
+  } catch (error) {
+    alert("Invalid match pattern 😭\n\nSee https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Match_patterns");
   }
 });

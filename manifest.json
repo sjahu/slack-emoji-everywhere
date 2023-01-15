@@ -18,34 +18,21 @@
         "slack.js"
       ],
       "run_at": "document_idle"
-    },
-    {
-      "matches": [
-        "file:///*" // TODO: load content script on other sites
-      ],
-      "exclude_matches": [
-        "https://app.slack.com/*"
-      ],
-      "js": [
-        "not-slack.js"
-      ],
-      "css": [
-        "slack-emoji-everywhere.css"
-      ],
-      "run_at": "document_idle"
     }
   ],
   "background": {
-    "scripts": [
-      "background.js"
-    ],
+    "page": "background.html",
     "persistent": false
   },
   "options_ui": {
     "page": "options.html"
   },
   "permissions": [
-    "storage",
-    "https://*.slack.com/*"
+    "storage", // to persist settings
+    "scripting", // to programmatically inject content scripts only when necessary
+    "https://*.slack.com/*" // to read cookies and subvert the same-origin policy
+  ],
+  "optional_permissions": [
+    "<all_urls>" // to allow the user to grant access to other site data on a per-site basis
   ]
 }

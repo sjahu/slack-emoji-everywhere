@@ -1,3 +1,5 @@
+import { get_user_added_match_patterns } from "./optional_host_permissions.js";
+
 const emojiUrlRegex = /https:\/\/[a-zA-Z0-9_\-\/.]+/
 
 browser.storage.local.get(["slackConfig", "selectedTeamId"]).then((item) => {
@@ -24,6 +26,29 @@ browser.storage.local.get(["slackConfig", "selectedTeamId"]).then((item) => {
 
           return results;
         });
+      }
+    });
+
+    get_user_added_match_patterns().then((patterns) => {
+      if (patterns.length) {
+        browser.scripting.registerContentScripts(
+          [
+            {
+              id: "not-slack",
+              matches: patterns,
+              excludeMatches: [
+                "https://app.slack.com/*"
+              ],
+              js: [
+                "not-slack.js"
+              ],
+              css: [
+                "slack-emoji-everywhere.css"
+              ],
+              runAt: "document_idle"
+            }
+          ]
+        );
       }
     });
   }
