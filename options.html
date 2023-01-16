@@ -73,31 +73,42 @@
 
 <body>
   <h2>Slack Workspace</h2>
-  <p>Choose which workspace to query for custom emoji.</p>
-  <!-- TODO: support multiple workspaces? Let the user order in them in fallback priority? -->
-  <div id="workspace-inputs">
-    Failed to load workspaces. 😪
-  </div>
-  <p id="workspaces-missing">Missing the workspace you're looking for? Make sure you're <a
-      href="https://app.slack.com/client/" target="_blank">signed in to
-      Slack</a>, then refresh this page.</p>
+  <div>
+    <p>Choose which workspace to query for custom emoji.</p>
+    <!-- TODO: support multiple workspaces? Let the user order in them in fallback priority? -->
+    <div id="workspace-inputs">
+      Failed to load workspaces. 😪
+    </div>
+    <p id="workspaces-missing">Missing the workspace you're looking for? Make sure you're <a
+        href="https://app.slack.com/client/" target="_blank">signed in to
+        Slack</a>, then refresh this page.</p>
 
-  <h2>Emojification Targets</h2>
-  <p>Specify which sites to inject custom emoji into using <a
-      href="https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Match_patterns">match patterns</a>.
-    Valid patterns include <code>https://*.example.com/*</code> and <code>&lt;all_urls&gt;</code>.</p>
+    <h2>Emojification Targets</h2>
+    <p>Specify which sites to inject custom emoji into using <a
+        href="https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Match_patterns">match patterns</a>.
+      Valid patterns include <code>https://*.example.com/*</code> and <code>&lt;all_urls&gt;</code>.</p>
+  </div>
 
   <h3>Patterns</h3>
-  <ul id="match-patterns">
-  </ul>
-
   <div>
+    <ul id="match-patterns">
+    </ul>
+
     <input type="text" id="match-pattern-input" value="https://*.example.com/*"><input type="button"
       id="match-pattern-add-button" value="Add">
   </div>
 
+  <h2>Cache</h3>
+    <div>
+      <p>The cache contains information about <span id="emoji-cache-count">n</span> emoji. Clear the cache if you're
+        concerned about storage space, an emoji has been updated and you still see the old version, or if an emoji has
+        been deleted and its presence offends you.</p>
+      <input type="button" id="clear-cache-button" value="Clear cache">
+    </div>
 
-  <script type="module" src="options.js"></script>
+
+    <script type="module" src="options.js"></script>
+    <script type="module" src="options.js"></script>
 </body>
 
 </html>

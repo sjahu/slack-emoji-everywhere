@@ -1,4 +1,5 @@
 import { get_user_added_match_patterns } from "./optional_host_permissions.js";
+import * as emojiCache from "./emoji_url_cache.js";
 
 browser.storage.local.get(["slackConfig", "selectedTeamId"]).then((item) => {
   if (item.slackConfig) {
@@ -58,4 +59,11 @@ document.querySelector("#match-pattern-add-button").addEventListener("click", ()
   } catch (error) {
     alert("Invalid match pattern 😭\n\nSee https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Match_patterns");
   }
+});
+
+emojiCache.count().then((count) => document.querySelector("#emoji-cache-count").textContent = count);
+
+document.querySelector("#clear-cache-button").addEventListener("click", () => {
+  emojiCache.clear();
+  browser.runtime.reload();
 });
