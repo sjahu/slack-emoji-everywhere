@@ -66,16 +66,18 @@ function processNodes(nodes) {
           // When split is called with a regex containing a capture group, the capture group
           // values are spliced into the array. Annoying, but we can work with it...
           if (i % 2) { // odd substrings are emoji matches
-            if (emojiUrls[substring]) {
+            let name = substring;
+
+            if (emojiUrls[name]) {
               let imgElement = document.createElement("img");
               imgElement.setAttribute("class", "slack-emoji-everywhere");
-              imgElement.setAttribute("src", emojiUrls[substring]);
-              imgElement.setAttribute("title", substring);
-              imgElement.setAttribute("alt", `:${substring}:`);
+              imgElement.setAttribute("src", emojiUrls[name]);
+              imgElement.setAttribute("title", name);
+              imgElement.setAttribute("alt", `:${name}:`);
 
               return imgElement;
             } else {
-              return document.createTextNode(`:${substring}:`);
+              return document.createTextNode(`:${name}:`);
             }
           } else { // even substrings are normal text
             return document.createTextNode(substring);
