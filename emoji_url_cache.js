@@ -45,21 +45,6 @@ export function put(values) { // promise returns array with the keys of the inse
   );
 }
 
-export function remove(keys) { // promise returns nothing
-  return getDB().then(
-    (db) => new Promise((resolve) => {
-      let objectStore = db.transaction(STORE_NAME, "readwrite").objectStore(STORE_NAME);
-
-      Promise.all(
-        keys.map((key) => new Promise((resolve) => {
-          objectStore.delete(key).onsuccess = (e) => resolve(); // result is undefined
-        }))
-      ).then((results) => resolve());
-    }),
-    () => [] // failed to get DB
-  );
-}
-
 export function clear() { // promise returns nothing
   return getDB().then(
     (db) => new Promise((resolve) => {
