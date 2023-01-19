@@ -111,6 +111,12 @@ document.querySelector("#match-pattern-add-button").addEventListener("click", ()
   }
 });
 
+document.querySelector("#match-pattern-input").addEventListener("keyup", (e) => {
+  if (e.key == "Enter") {
+    document.querySelector("#match-pattern-add-button").click()
+  }
+});
+
 emojiCache.count().then((count) => document.querySelector("#emoji-cache-count").textContent = count);
 
 document.querySelector("#clear-cache-button").addEventListener("click", () => {
