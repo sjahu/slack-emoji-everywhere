@@ -12,7 +12,7 @@
 
     h2,
     h3 {
-      margin-bottom: 0px;
+      margin-bottom: 4px;
     }
 
     ul {
@@ -23,6 +23,11 @@
 
     li {
       padding-top: 4px;
+    }
+
+    label img,
+    label span {
+      margin-left: 6px;
     }
 
     #workspaces-missing {
@@ -87,12 +92,14 @@
     <p>Specify which sites to inject custom emoji into using <a
         href="https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Match_patterns">match patterns</a>.
       Valid patterns include <code>https://*.example.com/*</code> and <code>&lt;all_urls&gt;</code>.</p>
+
   </div>
 
   <h3>Patterns</h3>
   <div>
-    <ul id="match-patterns">
-    </ul>
+    <div id="match-patterns">
+      No patterns configured! 🤔
+    </div>
 
     <input type="text" id="match-pattern-input" value="https://*.example.com/*"><input type="button"
       id="match-pattern-add-button" value="Add">

@@ -5,47 +5,97 @@ browser.storage.local.get(["slackConfig", "selectedTeamId"]).then((item) => {
   if (item.slackConfig) {
     let teams = Object.values(item.slackConfig.teams).sort((a, b) => a.name.localeCompare(b.name));
     if (teams.length) {
-      document.querySelector("#workspace-inputs").innerHTML = `
-        <ul>${teams.map((team) => `
-          <li>
-            <input type="radio"
-                  name="workspace"
-                  id="${team.id}"
-                  value="${team.id}"
-                  ${team.id === item.selectedTeamId ? 'checked' : ''}
-            >
-            <label for="${team.id}">
-              <img class="workspace-image" src="${team.icon.image_68}">
-              ${team.name}
-              <span class="team-url">${team.url}</span>
-            </label>
-          </li>
-        `).join("")}</ul>
-      `;
-      document.querySelectorAll("input[name='workspace']").forEach((input) => input.addEventListener("change", () => {
-        browser.storage.local.set({ selectedTeamId: input.value });
-        browser.runtime.reload();
+      let ul = document.createElement("ul");
+      ul.append(...teams.map((team) => {
+        let li = document.createElement("li");
+        {
+          let input = document.createElement("input");
+          input.setAttribute("type", "radio");
+          input.setAttribute("name", "workspace");
+          input.setAttribute("id", team.id);
+          input.setAttribute("value", team.id);
+          if (team.id === item.selectedTeamId) {
+            input.setAttribute("checked", "");
+          }
+          input.addEventListener("change", () => {
+            browser.storage.local.set({ selectedTeamId: input.value });
+            browser.runtime.reload();
+          });
+
+          let label = document.createElement("label");
+          {
+            label.setAttribute("for", team.id);
+
+            let img = document.createElement("img");
+            {
+              img.setAttribute("class", "workspace-image");
+              img.setAttribute("src", team.icon.image_68);
+            }
+
+            let spanTeamName = document.createElement("span");
+            {
+              spanTeamName.setAttribute("class", "team-name");
+              spanTeamName.textContent = team.name;
+            }
+
+            let spanTeamUrl = document.createElement("span");
+            {
+              spanTeamUrl.setAttribute("class", "team-url");
+              spanTeamUrl.textContent = team.url;
+            }
+
+            label.append(img, spanTeamName, spanTeamUrl);
+          }
+
+          li.append(input, label);
+        }
+        return li;
       }));
+      document.querySelector("#workspace-inputs").replaceChildren(ul);
     }
   }
 });
 
 get_user_added_match_patterns().then((patterns) => {
-  document.querySelector("#match-patterns").innerHTML = patterns.map((pattern) => `
-    <li>
-      <div class="match-pattern"><code>${pattern.replace("<all_urls>", "&lt;all_urls&gt;")}</code></div><input type="button" class="match-pattern-delete-button" value="Remove" data-pattern="${pattern}">
-    </li>
-  `).join("");
+  if (patterns.length) {
+    let ul = document.createElement("ul");
+    ul.append(...patterns.map((pattern) => {
+      let li = document.createElement("li");
+      {
+        let div = document.createElement("div");
+        {
+          div.setAttribute("class", "match-pattern");
 
-  document.querySelectorAll(".match-pattern-delete-button").forEach((input) => {
-    input.addEventListener("click", () => {
-      browser.permissions.remove({ origins: [input.dataset.pattern] }).then((success) => {
-        if (success) {
-          browser.runtime.reload();
+          let code = document.createElement("code");
+          {
+            code.textContent = pattern.replace("<all_urls>", "&lt;all_urls&gt;");
+          }
+
+          div.append(code);
         }
-      });
-    })
-  });
+
+        let input = document.createElement("input");
+        {
+          input.setAttribute("type", "button");
+          input.setAttribute("class", "match-pattern-delete-button");
+          input.setAttribute("value", "Remove");
+          input.setAttribute("data-pattern", pattern);
+
+          input.addEventListener("click", () => {
+            browser.permissions.remove({ origins: [input.dataset.pattern] }).then((success) => {
+              if (success) {
+                browser.runtime.reload();
+              }
+            });
+          });
+        }
+
+        li.append(div, input);
+      }
+      return li;
+    }));
+    document.querySelector("#match-patterns").replaceChildren(ul);
+  }
 });
 
 document.querySelector("#match-pattern-add-button").addEventListener("click", () => {
