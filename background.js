@@ -23,16 +23,18 @@ browser.storage.local.get(["slackConfig", "selectedTeamId"]).then((item) => {
   }
 });
 
-function handleGetEmoji(team, emojiNames) {
-  return emojiCache.get(emojiNames).then((cachedEmojis) => // each emoji is an object like { "name": "emoji1", "updated": 1234567890, "value": "https://..." }
-    fetchAndCacheEmojis(
-      team,
-      filterMissingOrOldEmojis(emojiNames, cachedEmojis)
-    ).then((updatedEmojis) =>
-      Object.values({ ...cachedEmojis, ...updatedEmojis })
-        .reduce((newObj, obj) => (newObj[obj.name] = obj.value, newObj), {}) // returns { "emoji1": "https://...", "emoji2": "https://..." ... }
-    )
+async function handleGetEmoji(team, emojiNames) {
+  const cachedEmojis = await emojiCache.get(emojiNames);
+
+  const updatedEmojis = await fetchAndCacheEmojis(
+    team,
+    filterMissingOrOldEmojis(emojiNames, cachedEmojis)
   );
+
+  return Object.values({ ...cachedEmojis, ...updatedEmojis }).reduce(
+    (newObj, obj) => (newObj[obj.name] = obj.value, newObj),
+    {}
+  ); // returns { "emoji1": "https://...", "emoji2": "https://..." ... }
 }
 
 function filterMissingOrOldEmojis(emojiNames, cachedEmojis) {
@@ -53,49 +55,51 @@ function filterMissingOrOldEmojis(emojiNames, cachedEmojis) {
   return { ...missingEmojis, ...oldEmojis };
 }
 
-function fetchAndCacheEmojis(team, emojis) {
+async function fetchAndCacheEmojis(team, emojis) {
   if (Object.keys(emojis).length) {
-    return fetchEmojisFromApi(team, emojis).then((data) => {
-      data.failed_ids?.forEach((failed_id) => {
-        emojis[failed_id] = {
-          name: failed_id,
-          updated: 0,
-          value: null,
-        };
-      });
+    const data = await fetchEmojisFromApi(team, emojis);
 
-      data.results?.forEach((result) => {
-        emojis[result.name] = {
-          name: result.name,
-          updated: result.updated,
-          value: result.value.match(EMOJI_URL_REGEX)?.groups.url, // make sure the emoji URL is actually a URL
-        };
-      });
-
-      emojiCache.put(Object.values(emojis)); // update any updated or deleted emoji, refresh the timestamp for the rest
-
-      return emojis;
+    data.failed_ids?.forEach((failed_id) => {
+      emojis[failed_id] = {
+        name: failed_id,
+        updated: 0,
+        value: null,
+      };
     });
+
+    data.results?.forEach((result) => {
+      emojis[result.name] = {
+        name: result.name,
+        updated: result.updated,
+        value: result.value.match(EMOJI_URL_REGEX)?.groups.url, // make sure the emoji URL is actually a URL
+      };
+    });
+
+    emojiCache.put(Object.values(emojis)); // update any updated or deleted emoji, refresh the timestamp for the rest
+
+    return emojis;
   } else {
-    return Promise.resolve().then(() => new Object());
+    return {};
   }
 }
 
-function fetchEmojisFromApi(team, emojis) {
-  return fetch(`https://edgeapi.slack.com/cache/${team.enterprise_id}/${team.id}/emojis/info`, {
+async function fetchEmojisFromApi(team, emojis) {
+  const response = await fetch(`https://edgeapi.slack.com/cache/${team.enterprise_id}/${team.id}/emojis/info`, {
     "method": "POST",
     "headers": {
       "Content-Type": "application/json"
     },
     "body": JSON.stringify({
       "token": team.token,
-      "updated_ids": Object.entries(emojis).reduce((newObj, [k, v]) =>
-        (newObj[k] = v.updated, newObj),
+      "updated_ids": Object.entries(emojis).reduce(
+        (newObj, [k, v]) => (newObj[k] = v.updated, newObj),
         {}
       ) // map emojis to { "oldEmoji": 1596964923, "missingEmoji": 0, etc. }
       // the API only returns URLs for emoji for which our "updated" value is out-of-date
     })
-  }).then((response) => response.json());
+  });
+
+  return await response.json();
 }
 
 function registerContentScripts(patterns) {
