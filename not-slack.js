@@ -1,4 +1,4 @@
-const emojiRegex = /:(?<name>[a-z0-9_\-]{1,100}):/g;
+const emojiRegex = /:(?<name>[a-z0-9_\-'+]{1,100}):/g;
 
 // CSS selector to match all elements that we'll inject emoji into
 // this is a curated subset of all the elements listed on https://developer.mozilla.org/en-US/docs/Web/HTML/Element

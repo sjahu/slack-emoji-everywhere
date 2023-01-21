@@ -1,7 +1,7 @@
 import { get_user_added_match_patterns } from "./optional_host_permissions.js";
 import * as emojiCache from "./emoji_url_cache.js";
 
-const EMOJI_URL_REGEX = /^(?<url>https:\/\/[a-zA-Z0-9_\-\/.]+)$/
+const EMOJI_URL_REGEX = /^(?<url>https:\/\/[a-zA-Z0-9_\-\/.%]+)$/
 const CACHE_TTL = 7 * 24 * 60 * 60 * 1000; // Refresh emoji URLs older than this
 
 browser.storage.local.get(["slackConfig", "selectedTeamId"]).then((item) => {
