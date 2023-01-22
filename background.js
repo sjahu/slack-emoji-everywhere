@@ -3,6 +3,7 @@ import * as emojiCache from "./emoji_url_cache.js";
 
 const EMOJI_URL_REGEX = /^(?<url>https:\/\/[a-zA-Z0-9_\-\/.%]+)$/
 const CACHE_TTL = 7 * 24 * 60 * 60 * 1000; // Refresh emoji URLs older than this
+const SEARCH_COUNT = 25;
 
 browser.storage.local.get(["slackConfig", "selectedTeamId"]).then((item) => {
   let team = item.slackConfig?.teams[item.selectedTeamId];
@@ -12,6 +13,8 @@ browser.storage.local.get(["slackConfig", "selectedTeamId"]).then((item) => {
       switch (request.type) {
         case "getEmoji":
           return handleGetEmoji(team, request.emojiNames);
+        case "searchEmoji":
+          return handleSearchEmoji(team, request.query);
       }
     });
 
@@ -121,4 +124,36 @@ function registerContentScripts(patterns) {
       }
     ]
   );
+}
+
+async function handleSearchEmoji(team, query) {
+  const data = await fetchSearchResultsFromApi(team, query);
+
+  let emojis = data.results.map((result) => {
+    return {
+      name: result.name,
+      updated: result.updated,
+      value: result.value.match(EMOJI_URL_REGEX)?.groups.url, // make sure the emoji URL is actually a URL
+    };
+  });
+
+  emojiCache.put(Object.values(emojis));
+
+  return emojis;
+}
+
+async function fetchSearchResultsFromApi(team, query) {
+  const response = await fetch(`https://edgeapi.slack.com/cache/${team.enterprise_id}/${team.id}/emojis/search`, {
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": JSON.stringify({
+      "token": team.token,
+      "count": SEARCH_COUNT,
+      "query": query
+    })
+  });
+
+  return await response.json();
 }
