@@ -94,8 +94,8 @@ async function fetchEmojisFromApi(team, emojis) {
     },
     "body": JSON.stringify({
       "token": team.token,
-      "updated_ids": Object.entries(emojis).reduce(
-        (newObj, [k, v]) => (newObj[k] = v.updated, newObj),
+      "updated_ids": Object.values(emojis).reduce(
+        (newObj, emoji) => (newObj[emoji.name] = emoji.updated, newObj),
         {}
       ) // map emojis to { "oldEmoji": 1596964923, "missingEmoji": 0, etc. }
       // the API only returns URLs for emoji for which our "updated" value is out-of-date
