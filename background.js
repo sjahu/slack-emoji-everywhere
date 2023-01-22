@@ -74,7 +74,7 @@ async function fetchAndCacheEmojis(team, emojis) {
       emojis[result.name] = {
         name: result.name,
         updated: result.updated,
-        value: result.value.match(EMOJI_URL_REGEX)?.groups.url, // make sure the emoji URL is actually a URL
+        value: result.value,
       };
     });
 
@@ -87,7 +87,7 @@ async function fetchAndCacheEmojis(team, emojis) {
 }
 
 async function fetchEmojisFromApi(team, emojis) {
-  const response = await fetch(`https://edgeapi.slack.com/cache/${team.enterprise_id}/${team.id}/emojis/info`, {
+  const data = await fetch(`https://edgeapi.slack.com/cache/${team.enterprise_id}/${team.id}/emojis/info`, {
     "method": "POST",
     "headers": {
       "Content-Type": "application/json"
@@ -100,9 +100,16 @@ async function fetchEmojisFromApi(team, emojis) {
       ) // map emojis to { "oldEmoji": 1596964923, "missingEmoji": 0, etc. }
       // the API only returns URLs for emoji for which our "updated" value is out-of-date
     })
-  });
+  }).then((response) => response.json());
 
-  return await response.json();
+  data.results.forEach((result) => {
+    if (!result.value.match(EMOJI_URL_REGEX)?.groups.url) {
+      console.error("Response from emoji server contains bad URL", data);
+      throw new Error();
+    }
+  })
+
+  return data;
 }
 
 function registerContentScripts(patterns) {
@@ -133,7 +140,7 @@ async function handleSearchEmoji(team, query) {
     return {
       name: result.name,
       updated: result.updated,
-      value: result.value.match(EMOJI_URL_REGEX)?.groups.url, // make sure the emoji URL is actually a URL
+      value: result.value,
     };
   });
 
@@ -143,7 +150,7 @@ async function handleSearchEmoji(team, query) {
 }
 
 async function fetchSearchResultsFromApi(team, query) {
-  const response = await fetch(`https://edgeapi.slack.com/cache/${team.enterprise_id}/${team.id}/emojis/search`, {
+  const data = await fetch(`https://edgeapi.slack.com/cache/${team.enterprise_id}/${team.id}/emojis/search`, {
     "method": "POST",
     "headers": {
       "Content-Type": "application/json"
@@ -153,7 +160,14 @@ async function fetchSearchResultsFromApi(team, query) {
       "count": SEARCH_COUNT,
       "query": query
     })
-  });
+  }).then((response) => response.json());
 
-  return await response.json();
+  data.results.forEach((result) => {
+    if (!result.value.match(EMOJI_URL_REGEX)?.groups.url) {
+      console.error("Response from emoji server contains bad URL", data);
+      throw new Error();
+    }
+  })
+
+  return data;
 }
