@@ -12,7 +12,7 @@
   "content_scripts": [
     {
       "matches": [
-        "https://app.slack.com/*"
+        "https://app.slack.com/*" // to extract slack auth info from localstorage
       ],
       "js": [
         "slack.js"
@@ -30,7 +30,7 @@
   "permissions": [
     "storage", // to persist settings
     "scripting", // to programmatically inject content scripts only when necessary
-    "https://*.slack.com/*" // to read cookies and subvert the same-origin policy
+    "https://edgeapi.slack.com/*" // to make requests to the Slack API in spite of the same-origin policy
   ],
   "optional_permissions": [
     "<all_urls>" // to allow the user to grant access to other site data on a per-site basis
