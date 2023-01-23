@@ -1,4 +1,5 @@
 const emojiRegex = /:(?<name>[a-z0-9_\-'+]{1,100}):/g;
+const partialEmojiRegex = /:(?<name>[a-z0-9_\-'+]{1,100})/g;
 
 // CSS selector to match all elements that we'll inject emoji into
 // this is a curated subset of all the elements listed on https://developer.mozilla.org/en-US/docs/Web/HTML/Element
@@ -90,4 +91,39 @@ function processNodes(nodes) {
       }
     });
   }
+}
+
+window.addEventListener("input", (e) => {
+  let range = window.getSelection().getRangeAt(0);
+  let node = range.endContainer;
+
+  let query;
+
+  if (node.nodeType == Node.TEXT_NODE) {
+    if (range.collapsed) {
+      query = getPartialEmojiNameAtChar(node.textContent, range.endOffset);
+    }
+  } else {
+    if (node.selectionEnd == node.selectionStart) {
+      query = getPartialEmojiNameAtChar(node.value, node.selectionEnd);
+    }
+  }
+
+  if (query) {
+    browser.runtime.sendMessage({ type: "searchEmoji", query: query }).then((results) => console.log(results));
+  }
+});
+
+function getPartialEmojiNameAtChar(str, pos) {
+  let completeEmojiMatches = [...str.matchAll(emojiRegex)];
+  let partialEmojiMatches = [...str.matchAll(partialEmojiRegex)];
+
+  let newEmojiMatch = partialEmojiMatches.find((partialMatch) =>
+    pos > partialMatch.index && pos <= partialMatch.index + partialMatch[0].length // caret is in a partial match
+    && !completeEmojiMatches.find((completeMatch) => // partial match doesn't begin with the end of a complete match
+      partialMatch.index == completeMatch.index + completeMatch[0].length - 1
+    )
+  );
+
+  return newEmojiMatch?.groups.name;
 }
