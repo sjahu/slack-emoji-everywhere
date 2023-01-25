@@ -114,7 +114,7 @@ window.addEventListener("input", (e) => {
       makeEmojiSelector(results);
     });
   }
-});
+}, { capture: true });
 
 function getPartialEmojiNameAtChar(str, pos) {
   let completeEmojiMatches = [...str.matchAll(emojiRegex)];
