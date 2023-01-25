@@ -2,3 +2,51 @@
   width: 22px;
   height: 22px;
 }
+
+.slack-emoji-everywhere-picker {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  width: 300px;
+  max-height: 150px;
+  overflow: scroll;
+  padding: 2px;
+  border-style: solid;
+  border-width: 1px;
+  border-radius: 4px;
+  border-color: grey;
+  font-family: Helvetica, sans-serif;
+  font-weight: lighter;
+  color: black;
+  background: white;
+}
+
+.slack-emoji-everywhere-picker ul {
+  list-style-type: none;
+  margin: 0px;
+  padding: 0px;
+}
+
+.slack-emoji-everywhere-picker li[selected=""] {
+  background: midnightblue;
+  color: white;
+  cursor: pointer;
+}
+
+.slack-emoji-everywhere-picker li {
+  padding: 2px;
+  vertical-align: middle;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.slack-emoji-everywhere-picker li img {
+  vertical-align: middle;
+}
+
+.slack-emoji-everywhere-picker li span {
+  vertical-align: middle;
+  padding-left: 4px;
+  padding-top: 2px;
+}

@@ -110,7 +110,9 @@ window.addEventListener("input", (e) => {
   }
 
   if (query) {
-    browser.runtime.sendMessage({ type: "searchEmoji", query: query }).then((results) => console.log(results));
+    browser.runtime.sendMessage({ type: "searchEmoji", query: query }).then((results) => {
+      makeEmojiSelector(results);
+    });
   }
 });
 
@@ -126,4 +128,101 @@ function getPartialEmojiNameAtChar(str, pos) {
   );
 
   return newEmojiMatch?.groups.name;
+}
+
+function makeEmojiSelector(emojis) {
+  let picker = document.querySelector(".slack-emoji-everywhere-picker") || document.createElement("div");
+  {
+    picker.setAttribute("class", "slack-emoji-everywhere-picker");
+
+    let ul = document.createElement("ul");
+    {
+      ul.append(...emojis.map((emoji) => {
+        let li = document.createElement("li");
+        {
+          li.setAttribute("data-name", emoji.name);
+
+          let img = document.createElement("img");
+          {
+            img.setAttribute("src", emoji.value);
+            img.setAttribute("class", "slack-emoji-everywhere");
+          }
+
+          let span = document.createElement("span");
+          {
+            span.append(":\u200B", emoji.name, "\u200B:"); // zero-width space chars so we don't emojify these labels
+          }
+
+          li.append(img, span);
+
+          li.addEventListener("click", (e) => {
+            e.preventDefault();
+            insertEmoji(li.getAttribute("data-name"));
+            picker.remove();
+          });
+
+          li.addEventListener("mouseenter", (e) => {
+            li.parentNode.childNodes.forEach((node) => node.removeAttribute("selected"));
+            li.setAttribute("selected", "");
+          })
+        }
+        return li;
+      }));
+
+      ul.children[0]?.setAttribute("selected", "");
+    }
+
+    picker.replaceChildren(ul);
+  }
+
+  document.body.append(picker);
+}
+
+window.addEventListener("keydown", (e) => {
+  let picker = document.querySelector(".slack-emoji-everywhere-picker");
+  let li = picker?.querySelector("li[selected]");
+
+  if (li) {
+    switch (e.key) {
+      case "Escape":
+        picker.remove();
+        break;
+      case "Enter":
+      case "Tab":
+        e.preventDefault();
+        insertEmoji(li.getAttribute("data-name"));
+        picker.remove();
+        break;
+      case "ArrowUp":
+        e.preventDefault();
+        li.removeAttribute("selected");
+
+        li = li.previousSibling || li.parentNode.children[li.parentNode.children.length - 1];
+
+        li.setAttribute("selected", "");
+        if (li.offsetTop < picker.scrollTop || !li.nextSibling) {
+          li.scrollIntoView(true); // true=align to top of view
+        }
+        break;
+      case "ArrowDown":
+        e.preventDefault();
+        li.removeAttribute("selected");
+
+        li = li.nextSibling || li.parentNode.children[0];
+
+        li.setAttribute("selected", "");
+        if (li.offsetTop + li.offsetHeight > picker.scrollTop + picker.offsetHeight || !li.previousSibling) {
+          li.scrollIntoView(false); // false=align to bottom of view
+        }
+        break;
+    }
+  }
+});
+
+window.addEventListener("click", (e) => {
+  document.querySelector(".slack-emoji-everywhere-picker")?.remove();
+});
+
+function insertEmoji(emojiName) {
+  console.log(emojiName);
 }
