@@ -93,28 +93,82 @@ function processNodes(nodes) {
   }
 }
 
-window.addEventListener("input", (e) => {
+window.addEventListener("selectionchange", handleCaretChange, { capture: true });
+window.addEventListener("resize", handleCaretChange);
+document.addEventListener("scroll", handleCaretChange);
+
+function handleCaretChange() {
   let range = window.getSelection().getRangeAt(0);
   let node = range.endContainer;
 
-  let query;
+  let existingPicker = getPicker();
+
+  if (existingPicker) {
+    let parent = node;
+    do {
+      if (parent == existingPicker) {
+        return; // return if the selection changed because the user clicked on the picker
+      }
+    } while (parent = parent.parentElement);
+  }
+
+  let match, callback, x, y;
 
   if (node.nodeType == Node.TEXT_NODE) {
     if (range.collapsed) {
-      query = getPartialEmojiNameAtChar(node.textContent, range.endOffset);
+      match = getPartialEmojiNameAtChar(node.textContent, range.endOffset);
+      callback = (emojiName) => {
+        let result = insertEmoji(match, emojiName);
+        node.textContent = result.str;
+        let newSelection = window.getSelection();
+        let newRange = document.createRange();
+        newRange.setStart(node, result.pos);
+        newRange.setEnd(node, result.pos);
+        newSelection.removeAllRanges();
+        newSelection.addRange(newRange);
+      };
+      let rect = range.getClientRects()[0];
+      x = rect.x;
+      y = rect.y;
     }
   } else {
     if (node.selectionEnd == node.selectionStart) {
-      query = getPartialEmojiNameAtChar(node.value, node.selectionEnd);
+      match = getPartialEmojiNameAtChar(node.value, node.selectionEnd);
+      callback = (emojiName) => {
+        let result = insertEmoji(match, emojiName);
+        node.value = result.str;
+        node.focus();
+        node.selectionStart = result.pos;
+        node.selectionEnd = result.pos;
+      };
+
+      let rect = node.getBoundingClientRect();
+      x = rect.x + rect.width; // TODO: you can't get an exact x,y caret position from a textarea or input but apparently
+      y = rect.y; // you can create an identically styled invisible div and get the caret position from that element
     }
   }
 
-  if (query) {
-    browser.runtime.sendMessage({ type: "searchEmoji", query: query }).then((results) => {
-      makeEmojiSelector(results);
-    });
+  if (!match) {
+    existingPicker?.remove();
   }
-}, { capture: true });
+
+  if (existingPicker &&
+    existingPicker.emojiPickerNode == node &&
+    existingPicker.emojiPickerMatch[0] == match[0] &&
+    existingPicker.emojiPickerMatch.index == match.index &&
+    existingPicker.emojiPickerMatch.input == match.input
+  ) {
+    setPickerPosition(existingPicker, x, y);
+    return;
+  }
+
+  browser.runtime.sendMessage({ type: "searchEmoji", query: match.groups.name }).then((results) => {
+    if (results.length) {
+      let picker = makeEmojiPicker(results, node, match, callback);
+      setPickerPosition(picker, x, y);
+    }
+  });
+}
 
 function getPartialEmojiNameAtChar(str, pos) {
   let completeEmojiMatches = [...str.matchAll(emojiRegex)];
@@ -127,59 +181,69 @@ function getPartialEmojiNameAtChar(str, pos) {
     )
   );
 
-  return newEmojiMatch?.groups.name;
+  return newEmojiMatch;
 }
 
-function makeEmojiSelector(emojis) {
-  let picker = document.querySelector(".slack-emoji-everywhere-picker") || document.createElement("div");
+function makeEmojiPicker(emojis, node, match, callback) {
+  let picker = getPicker() || document.createElement("div");
   {
+    picker.emojiPickerNode = node;
+    picker.emojiPickerMatch = match;
+    picker.emojiPickerCallback = callback;
+
     picker.setAttribute("class", "slack-emoji-everywhere-picker");
 
-    let ul = document.createElement("ul");
+    let div = picker.querySelector("div") || document.createElement("div");
     {
-      ul.append(...emojis.map((emoji) => {
-        let li = document.createElement("li");
-        {
-          li.setAttribute("data-name", emoji.name);
-
-          let img = document.createElement("img");
+      let ul = document.createElement("ul");
+      {
+        ul.append(...emojis.map((emoji) => {
+          let li = document.createElement("li");
           {
-            img.setAttribute("src", emoji.value);
-            img.setAttribute("class", "slack-emoji-everywhere");
+            li.setAttribute("data-name", emoji.name);
+
+            let img = document.createElement("img");
+            {
+              img.setAttribute("src", emoji.value);
+              img.setAttribute("class", "slack-emoji-everywhere");
+            }
+
+            let span = document.createElement("span");
+            {
+              span.append(":\u200B", emoji.name, "\u200B:"); // zero-width space chars so we don't emojify these labels
+            }
+
+            li.append(img, span);
+
+            li.addEventListener("click", (e) => {
+              e.preventDefault();
+              picker.emojiPickerCallback(li.getAttribute("data-name"));
+              picker.remove();
+            });
+
+            li.addEventListener("mouseenter", (e) => {
+              li.parentNode.childNodes.forEach((node) => node.removeAttribute("selected"));
+              li.setAttribute("selected", "");
+            })
           }
+          return li;
+        }));
 
-          let span = document.createElement("span");
-          {
-            span.append(":\u200B", emoji.name, "\u200B:"); // zero-width space chars so we don't emojify these labels
-          }
-
-          li.append(img, span);
-
-          li.addEventListener("click", (e) => {
-            e.preventDefault();
-            insertEmoji(li.getAttribute("data-name"));
-            picker.remove();
-          });
-
-          li.addEventListener("mouseenter", (e) => {
-            li.parentNode.childNodes.forEach((node) => node.removeAttribute("selected"));
-            li.setAttribute("selected", "");
-          })
-        }
-        return li;
-      }));
-
-      ul.children[0]?.setAttribute("selected", "");
+        ul.children[0]?.setAttribute("selected", "");
+      }
+      div.replaceChildren(ul);
     }
 
-    picker.replaceChildren(ul);
+    picker.replaceChildren(div);
   }
 
   document.body.append(picker);
+
+  return picker;
 }
 
 window.addEventListener("keydown", (e) => {
-  let picker = document.querySelector(".slack-emoji-everywhere-picker");
+  let picker = getPicker();
   let li = picker?.querySelector("li[selected]");
 
   if (li) {
@@ -190,7 +254,7 @@ window.addEventListener("keydown", (e) => {
       case "Enter":
       case "Tab":
         e.preventDefault();
-        insertEmoji(li.getAttribute("data-name"));
+        picker.emojiPickerCallback(li.getAttribute("data-name"));
         picker.remove();
         break;
       case "ArrowUp":
@@ -219,10 +283,19 @@ window.addEventListener("keydown", (e) => {
   }
 });
 
-window.addEventListener("click", (e) => {
-  document.querySelector(".slack-emoji-everywhere-picker")?.remove();
-});
+function getPicker() {
+  return document.querySelector("body .slack-emoji-everywhere-picker");
+}
 
-function insertEmoji(emojiName) {
-  console.log(emojiName);
+function insertEmoji(match, emojiName) {
+  let endPeriodExists = match.input[match.index + match[0].length] == ":";
+  return {
+    str: match.input.substring(0, match.index) + ":" + emojiName + (endPeriodExists ? "" : ":") + match.input.substring(match.index + match[0].length), // new string
+    pos: match.index + emojiName.length + 2 // new caret position
+  };
+}
+
+function setPickerPosition(picker, x, y) {
+  picker.style.setProperty("top", `${Math.round(Math.max(0, Math.min(window.innerHeight - picker.clientHeight, y - picker.clientHeight)))}px`);
+  picker.style.setProperty("left", `${Math.round(Math.max(0, Math.min(window.innerWidth - picker.clientWidth, x)))}px`);
 }
