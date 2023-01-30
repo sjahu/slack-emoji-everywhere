@@ -172,6 +172,8 @@ function handleCaretChange() {
     if (results.length) {
       let picker = makeEmojiPicker(results, node, match, callback);
       setPickerPosition(picker, x, y);
+    } else {
+      existingPicker?.remove();
     }
   });
 }
