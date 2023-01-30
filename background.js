@@ -4,7 +4,7 @@ import * as emojiCache from "./emoji_url_cache.js";
 const EMOJI_URL_REGEX = /^(?<url>https:\/\/[a-zA-Z0-9_\-\/.%]+)$/;
 const CACHE_TTL = 7 * 24 * 60 * 60 * 1000; // Refresh emoji URLs older than this
 const SEARCH_COUNT = 25;
-const EMOJI_ALIAS_REGEX = /alias:(?<name>[a-z0-9_\-'+]{1,100})/;
+const EMOJI_ALIAS_REGEX = /^alias:(?<name>[a-z0-9_\-'+]{1,100})$/;
 
 browser.storage.local.get(["slackConfig", "selectedTeamId"]).then((item) => {
   let team = item.slackConfig?.teams[item.selectedTeamId];
@@ -163,12 +163,17 @@ async function fetchSearchResultsFromApi(team, query) {
     })
   }).then((response) => response.json());
 
+  data.results = data.results.filter(
+    (result) => !result.value.match(EMOJI_ALIAS_REGEX) // Filter aliases to native emoji until those are supported
+  ); // Aliases to custom emoji include a URL and can be treated normally
+
   data.results.forEach((result) => {
     if (!result.value.match(EMOJI_URL_REGEX)?.groups.url) {
       console.error("Response from emoji server contains bad URL", data);
       throw new Error();
     }
-  })
+    return result;
+  });
 
   return data;
 }
