@@ -114,7 +114,7 @@ function handleCaretChange() {
 
   let match, callback, x, y;
 
-  if (node.nodeType == Node.TEXT_NODE) {
+  if (node.nodeType == Node.TEXT_NODE && node.parentNode.isContentEditable) {
     if (range.collapsed) {
       match = getPartialEmojiNameAtChar(node.textContent, range.endOffset);
       callback = (emojiName) => {
@@ -131,7 +131,13 @@ function handleCaretChange() {
       x = rect.x;
       y = rect.y;
     }
-  } else {
+  } else if (
+    node.nodeType == Node.ELEMENT_NODE &&
+    (
+      node.nodeName == "TEXTAREA" ||
+      (node.nodeName == "INPUT" && node.getAttribute("type") == "text")
+    )
+  ) {
     if (node.selectionEnd == node.selectionStart) {
       match = getPartialEmojiNameAtChar(node.value, node.selectionEnd);
       callback = (emojiName) => {
