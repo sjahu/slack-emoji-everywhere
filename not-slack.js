@@ -1,9 +1,9 @@
-const emojiRegex = /:(?<name>[a-z0-9_\-'+]{1,100}):/g;
-const partialEmojiRegex = /:(?<name>[a-z0-9_\-'+]{1,100})/g;
+const EMOJI_REGEX = /:(?<name>[a-z0-9_\-'+]{1,100}):/g;
+const PARTIAL_EMOJI_REGEX = /:(?<name>[a-z0-9_\-'+]{1,100})/g;
 
 // CSS selector to match all elements that we'll inject emoji into
 // this is a curated subset of all the elements listed on https://developer.mozilla.org/en-US/docs/Web/HTML/Element
-const allowedParents = "body,address,article,aside,footer,header,h1,h2,h3,h4,h5,h6,main,nav,section,blockquote,dd,div,dl,dt,figcaption,figure,li,menu,ol,p,ul,a,abbr,b,bdi,bdo,cite,data,dfn,em,i,mark,q,s,span,strong,sub,sup,time,time,u,var,noscript,del,ins,caption,td,th,buttton,fieldset,form,label,legend,output,details,dialog,summary"
+const ALLOWED_PARENTS = "body,address,article,aside,footer,header,h1,h2,h3,h4,h5,h6,main,nav,section,blockquote,dd,div,dl,dt,figcaption,figure,li,menu,ol,p,ul,a,abbr,b,bdi,bdo,cite,data,dfn,em,i,mark,q,s,span,strong,sub,sup,time,time,u,var,noscript,del,ins,caption,td,th,buttton,fieldset,form,label,legend,output,details,dialog,summary"
 
 processNodes(getEmojiNodes(document.body)); // process all existing text nodes in the body on load
 
@@ -27,8 +27,8 @@ function getEmojiNodes(root) {
     root,
     NodeFilter.SHOW_TEXT, // only consider text nodes
     (node) =>
-      node.textContent.match(emojiRegex) &&
-        node.parentElement.matches(allowedParents) &&
+      node.textContent.match(EMOJI_REGEX) &&
+        node.parentElement.matches(ALLOWED_PARENTS) &&
         !node.parentNode.isContentEditable
         ?
         NodeFilter.FILTER_ACCEPT
@@ -49,7 +49,7 @@ function processNodes(nodes) {
   let emojiNames = new Set();
 
   for (const node of nodes) {
-    for (match of node.textContent.matchAll(emojiRegex)) {
+    for (match of node.textContent.matchAll(EMOJI_REGEX)) {
       emojiNames.add(match.groups.name);
     }
   }
@@ -59,11 +59,11 @@ function processNodes(nodes) {
     //       there doesn't appear to be a limit on the number of emojis per call, but there's a 10 000 byte limit on the size of the request body
     browser.runtime.sendMessage({ type: "getEmoji", emojiNames: [...emojiNames] }).then((emojiUrls) => {
       for (const node of nodes) {
-        if (![...node.textContent.matchAll(emojiRegex)].filter((match) => emojiUrls[match.groups.name]).length) {
+        if (![...node.textContent.matchAll(EMOJI_REGEX)].filter((match) => emojiUrls[match.groups.name]).length) {
           continue; // skip child node replacement if none of the emoji actually exist
         }
 
-        let childNodes = node.textContent.split(emojiRegex).map((substring, i) => {
+        let childNodes = node.textContent.split(EMOJI_REGEX).map((substring, i) => {
           // When split is called with a regex containing a capture group, the capture group
           // values are spliced into the array. Annoying, but we can work with it...
           if (i % 2) { // odd substrings are emoji matches
@@ -171,8 +171,8 @@ function handleCaretChange() {
 }
 
 function getPartialEmojiNameAtChar(str, pos) {
-  let completeEmojiMatches = [...str.matchAll(emojiRegex)];
-  let partialEmojiMatches = [...str.matchAll(partialEmojiRegex)];
+  let completeEmojiMatches = [...str.matchAll(EMOJI_REGEX)];
+  let partialEmojiMatches = [...str.matchAll(PARTIAL_EMOJI_REGEX)];
 
   let newEmojiMatch = partialEmojiMatches.find((partialMatch) =>
     pos > partialMatch.index && pos <= partialMatch.index + partialMatch[0].length // caret is in a partial match
