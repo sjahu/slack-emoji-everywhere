@@ -1,10 +1,10 @@
 # slack-emoji-everywhere
 
-**⚠️ WIP: This is very much a work in progress/proof of concept and is in no way ready for general use (and may never be).**
+**⚠️ WIP: This is a work in progress and is not quite ready for general use.**
 
 Wouldn't it be great if you could use Slack emoji on Workplace by Meta, or any other site? Yes, yes it would.
 
-This alpha-quality extension uses a signed-in Slack workspace to automagically download emoji and injects them into non-Slack webpages in place of text `:emoji:` tokens.
+This extension uses a signed-in Slack workspace to automagically download emoji and injects them into non-Slack webpages in place of text `:emoji:` tokens.
 
 ## Architecture
 
@@ -14,6 +14,7 @@ This alpha-quality extension uses a signed-in Slack workspace to automagically d
   - Background scripts are allowed to subvert CORS, which would make it impossible for javascript running on another page to communicate directly with Slack
 - `not-slack.js`: A content script that runs on non-Slack pages to insert emoji
   - Injects emoji once on page load, then monitors the DOM for updates to inject new emoji as needed
+  - Watches contenteditable nodes, textareas, and input[type=text] elements for emoji entry and displays an emoji picker.
 - Emoji are downloaded using the undocumented (publically, at least) API that the Slack web client uses.
 - API requests are authenticated using the logged-in user's cookie token: a token that is only valid when sent in combination with the session cookie
 
@@ -46,15 +47,19 @@ becomes...
 
 ![](demo.png)
 
-A post on Workplace:
+A post on Workplace, showing off the emoji picker:
 
 ![](demo2.png)
 
+Configuration:
+
+![](demo3.png)
+
 ## To do
 
-There are many things left to do to make this usable, some of which are tagged with `TODO` in the code.
+There are a few things left to do to make this usable, some of which are tagged with `TODO` in the code.
 
 Other ideas:
 
-- Add support for non-custom emoji (the Slack client downloads a big blob of all their names rather than getting them through the search API).
-- Implement an emoji picker for editible text, like Slack's (use the `emoji/search` API)
+- Add support for native emoji (the Slack client downloads a big blob of all their names rather than getting them through the search API).
+- Add support for specifying the URL of a non-Slack server implementing Slack's emoji API (e.g. to host your own emoji collection).
