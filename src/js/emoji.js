@@ -301,9 +301,9 @@ function getPicker() {
 }
 
 function insertEmoji(match, emojiName) {
-  let endPeriodExists = match.input[match.index + match[0].length] == ":";
+  let endColonExists = match.input[match.index + match[0].length] == ":";
   return {
-    str: match.input.substring(0, match.index) + ":" + emojiName + (endPeriodExists ? "" : ":") + match.input.substring(match.index + match[0].length), // new string
+    str: match.input.substring(0, match.index) + ":" + emojiName + (endColonExists ? "" : ":") + match.input.substring(match.index + match[0].length), // new string
     pos: match.index + emojiName.length + 2 // new caret position
   };
 }
