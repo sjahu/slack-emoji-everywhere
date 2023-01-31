@@ -3,7 +3,7 @@ const SEARCH_COUNT = 25;
 const EMOJI_ALIAS_REGEX = /^alias:(?<name>[a-z0-9_\-'+]{1,100})$/;
 
 export async function info(team, emojis) {
-  const data = await fetch(`https://edgeapi.slack.com/cache/${team.enterprise_id}/${team.id}/emojis/info`, {
+  const data = await fetch(makeUrl(team, "info"), {
     "method": "POST",
     "headers": {
       "Content-Type": "application/json"
@@ -29,7 +29,7 @@ export async function info(team, emojis) {
 }
 
 export async function search(team, query) {
-  const data = await fetch(`https://edgeapi.slack.com/cache/${team.enterprise_id}/${team.id}/emojis/search`, {
+  const data = await fetch(makeUrl(team, "search"), {
     "method": "POST",
     "headers": {
       "Content-Type": "application/json"
@@ -54,4 +54,12 @@ export async function search(team, query) {
   });
 
   return data;
+}
+
+function makeUrl(team, path) {
+  if (team.enterprise_id) {
+    return `https://edgeapi.slack.com/cache/${team.enterprise_id}/${team.id}/emojis/${path}`;
+  } else {
+    return `https://edgeapi.slack.com/cache/${team.id}/emojis/${path}`;
+  }
 }
