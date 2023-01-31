@@ -257,16 +257,20 @@ window.addEventListener("keydown", (e) => {
   if (li) {
     switch (e.key) {
       case "Escape":
+        e.preventDefault();
+        e.stopPropagation();
         picker.remove();
         break;
       case "Enter":
       case "Tab":
         e.preventDefault();
+        e.stopPropagation();
         picker.emojiPickerCallback(li.getAttribute("data-name"));
         picker.remove();
         break;
       case "ArrowUp":
         e.preventDefault();
+        e.stopPropagation();
         li.removeAttribute("selected");
 
         li = li.previousSibling || li.parentNode.children[li.parentNode.children.length - 1];
@@ -278,6 +282,7 @@ window.addEventListener("keydown", (e) => {
         break;
       case "ArrowDown":
         e.preventDefault();
+        e.stopPropagation();
         li.removeAttribute("selected");
 
         li = li.nextSibling || li.parentNode.children[0];
@@ -289,7 +294,7 @@ window.addEventListener("keydown", (e) => {
         break;
     }
   }
-});
+}, { capture: true });
 
 function getPicker() {
   return document.querySelector("body .slack-emoji-everywhere-picker");
