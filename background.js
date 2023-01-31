@@ -6,26 +6,32 @@ const CACHE_TTL = 7 * 24 * 60 * 60 * 1000; // Refresh emoji URLs older than this
 const SEARCH_COUNT = 25;
 const EMOJI_ALIAS_REGEX = /^alias:(?<name>[a-z0-9_\-'+]{1,100})$/;
 
-browser.storage.local.get(["slackConfig", "selectedTeamId"]).then((item) => {
-  let team = item.slackConfig?.teams[item.selectedTeamId];
-
+getTeam().then((team) => {
   if (team) {
-    browser.runtime.onMessage.addListener((request) => {
-      switch (request.type) {
-        case "getEmoji":
-          return handleGetEmoji(team, request.emojiNames);
-        case "searchEmoji":
-          return handleSearchEmoji(team, request.query);
-      }
-    });
-
     get_user_added_match_patterns().then((patterns) => {
-      if (patterns.length) {
+      if (team && patterns.length) {
         registerContentScripts(patterns);
       }
     });
   }
 });
+
+browser.runtime.onMessage.addListener(async (request) => {
+  const team = await getTeam();
+  if (team) {
+    switch (request.type) {
+      case "getEmoji":
+        return handleGetEmoji(team, request.emojiNames);
+      case "searchEmoji":
+        return handleSearchEmoji(team, request.query);
+    }
+  }
+});
+
+async function getTeam() {
+  let item = await browser.storage.local.get(["slackConfig", "selectedTeamId"]);
+  return item.slackConfig?.teams[item.selectedTeamId];
+}
 
 async function handleGetEmoji(team, emojiNames) {
   const cachedEmojis = await emojiCache.get(emojiNames);
