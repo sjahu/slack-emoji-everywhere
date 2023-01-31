@@ -302,9 +302,11 @@ function getPicker() {
 
 function insertEmoji(match, emojiName) {
   let endColonExists = match.input[match.index + match[0].length] == ":";
+  let endSpaceExists = match.input[match.index + match[0].length] == " " || match.input[match.index + match[0].length + 1] == " ";
+
   return {
-    str: match.input.substring(0, match.index) + ":" + emojiName + (endColonExists ? "" : ":") + match.input.substring(match.index + match[0].length), // new string
-    pos: match.index + emojiName.length + 2 // new caret position
+    str: match.input.substring(0, match.index) + ":" + emojiName + (endColonExists ? "" : ":") + match.input.substring(match.index + match[0].length) + (endSpaceExists ? "" : " "), // new string
+    pos: match.index + emojiName.length + 3 // new caret position (3 chars = 2x ':' chars plus 1x ' ')
   };
 }
 
