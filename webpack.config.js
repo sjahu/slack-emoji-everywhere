@@ -5,7 +5,7 @@ module.exports = {
     background: "./src/js/background.js",
     options: "./src/js/options.js",
     slack: "./src/js/slack.js",
-    "not-slack": "./src/js/not-slack.js"
+    emoji: "./src/js/emoji.js"
   },
   output: {
     filename: "[name].js",

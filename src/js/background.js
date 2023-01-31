@@ -123,16 +123,16 @@ function registerContentScripts(patterns) {
   browser.scripting.registerContentScripts(
     [
       {
-        id: "not-slack",
+        id: "emoji",
         matches: patterns,
         excludeMatches: [
           "https://app.slack.com/*"
         ],
         js: [
-          "not-slack.js"
+          "emoji.js"
         ],
         css: [
-          "slack-emoji-everywhere.css"
+          "emoji.css"
         ],
         runAt: "document_idle"
       }
