@@ -20,7 +20,7 @@ This extension uses a signed-in Slack workspace to automagically download emoji 
 
 ## Installation
 
-`zip slack-emoji-everywhere.xpi *` then load as a temporary add-on. Add the Slack workspace URL to the add-on preferences then open Slack at least once to load the auth info.
+`npm install` then load the resulting `slack-emoji-everywhere.xpi` file as a temporary add-on. Add the Slack workspace URL to the add-on preferences then open Slack at least once to load the auth info.
 
 ## Browser compatibility
 

@@ -1,5 +1,5 @@
-import { get_user_added_match_patterns } from "./optional_host_permissions.js";
-import * as emojiCache from "./emoji_url_cache.js";
+import { get_user_added_match_patterns } from "./lib/optional_host_permissions.js";
+import * as emojiCache from "./lib/emoji_url_cache.js";
 
 browser.storage.local.get(["slackConfig", "selectedTeamId"]).then((item) => {
   if (item.slackConfig) {

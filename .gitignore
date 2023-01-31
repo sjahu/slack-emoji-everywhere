@@ -1,1 +1,4 @@
+.DS_Store
 slack-emoji-everywhere.xpi
+node_modules
+dist
