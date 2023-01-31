@@ -8,15 +8,16 @@ This extension uses a signed-in Slack workspace to automagically download emoji 
 
 ## Architecture
 
-- `options.js`: Add-on settings
+- `options.js`: Add-on settings.
   - The extension doesn't request permissions for any sites other than Slack automatically. A user can add sites to the extensions watch list from the options page.
-- `background.js`: A background script that communicates with Slack
-  - Background scripts are allowed to subvert CORS, which would make it impossible for javascript running on another page to communicate directly with Slack
-- `emoji.js`: A content script that runs on non-Slack pages to insert emoji
-  - Injects emoji once on page load, then monitors the DOM for updates to inject new emoji as needed
+- `slack.js`: A content script that runs on app.slack.com to extract the user's auth token and save it to the extension's local storage where `background.js` can read it.
+- `background.js`: A background script that communicates with Slack.
+  - Background scripts are allowed to subvert the same-origin policy, which would make it impossible for javascript running on another page to communicate directly with Slack.
+- `emoji.js`: A content script that runs on non-Slack pages to insert emoji.
+  - Injects emoji once on page load, then monitors the DOM for updates to inject new emoji as needed.
   - Watches contenteditable nodes, textareas, and input[type=text] elements for emoji entry and displays an emoji picker.
 - Emoji are downloaded using the undocumented (publically, at least) API that the Slack web client uses.
-- API requests are authenticated using the logged-in user's cookie token: a token that is only valid when sent in combination with the session cookie
+- API requests are authenticated using the logged-in user's cookie token: a token that is only valid when sent in combination with the session cookie.
 
 ## Installation
 
