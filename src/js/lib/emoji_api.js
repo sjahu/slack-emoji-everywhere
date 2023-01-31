@@ -42,8 +42,14 @@ export async function search(team, query) {
   }).then((response) => response.json());
 
   data.results = data.results.filter(
-    (result) => !result.value.match(EMOJI_ALIAS_REGEX) // Filter aliases to native emoji until those are supported
-  ); // Aliases to custom emoji include a URL and can be treated normally
+    // Filter aliases to native emoji until those are supported
+    // Aliases to custom emoji include a URL and can be treated normally
+    // Also filter out non-string values... the API seems to sometimes return an object
+    // e.g. { apple: "", google: "" } for the value
+    // TODO: investigate. This definitely doesn't happen for all emoji-- I only saw this
+    // happen for an emoji called :simple_smile:
+    (result) => (typeof result.value == "string") && !result.value.match(EMOJI_ALIAS_REGEX)
+  );
 
   data.results.forEach((result) => {
     if (!result.value.match(EMOJI_URL_REGEX)?.groups.url) {
