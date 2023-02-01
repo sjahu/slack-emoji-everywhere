@@ -156,6 +156,7 @@ function handleCaretChange() {
 
   if (!match) {
     existingPicker?.remove();
+    return;
   }
 
   if (existingPicker &&
