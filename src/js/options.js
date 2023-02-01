@@ -123,3 +123,13 @@ document.querySelector("#clear-cache-button").addEventListener("click", () => {
   emojiCache.clear();
   browser.runtime.reload();
 });
+
+document.querySelector("#slack-link").addEventListener("click", () => {
+  // In manifest v3, we need to explicitly get permission for these origins
+  // This might be a Firefox bug?
+  browser.permissions.request({ origins: ["https://app.slack.com/*", "https://edgeapi.slack.com/*"] }).then((success) => {
+    if (success) {
+      browser.tabs.create({ url: "https://app.slack.com/client" });
+    }
+  });
+});

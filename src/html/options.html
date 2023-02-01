@@ -34,6 +34,15 @@
       font-style: italic;
     }
 
+    #slack-link {
+      background: none;
+      border: none;
+      padding: 0;
+      color: blue;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
     .workspace-image {
       width: 22px;
       height: 22px;
@@ -84,9 +93,8 @@
     <div id="workspace-inputs">
       Failed to load workspaces. 😪
     </div>
-    <p id="workspaces-missing">Missing the workspace you're looking for? Make sure you're <a
-        href="https://app.slack.com/client/" target="_blank">signed in to
-        Slack</a>, then refresh this page.</p>
+    <p id="workspaces-missing">Missing the workspace you're looking for? Make sure you're <button id="slack-link">signed
+      in to Slack</button>, then refresh this page.</p>
 
     <h2>Emojification Targets</h2>
     <p>Specify which sites to inject custom emoji into using <a
