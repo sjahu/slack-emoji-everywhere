@@ -49,7 +49,7 @@ function processNodes(nodes) {
   let emojiNames = new Set();
 
   for (const node of nodes) {
-    for (match of node.textContent.matchAll(EMOJI_REGEX)) {
+    for (const match of node.textContent.matchAll(EMOJI_REGEX)) {
       emojiNames.add(match.groups.name);
     }
   }
