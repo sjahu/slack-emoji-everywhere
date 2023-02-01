@@ -21,7 +21,18 @@ This extension uses a signed-in Slack workspace to automagically download emoji 
 
 ## Installation
 
-`npm install` then load the resulting `slack-emoji-everywhere.xpi` file as a temporary add-on. Add the Slack workspace URL to the add-on preferences then open Slack at least once to load the auth info.
+Development dependencies:
+- `npm` and `webpack` to generate JavaScript bundles
+- `zip` to package the extension for Firefox
+- `chrome` or `chromium` to package the extension for Chrome
+
+Run `npm install` to build the extension.
+
+In Firefox, load `build/slack-emoji-everywhere.xpi` as a temporary add-on via the "Debug add-ons" page. Click "Reload" on that page to update the add-on after its been rebuilt.
+
+In Chrome, you can drag and drop `build/slack-emoji-everywhere.crx` into the extensions page, but it's better to simply enable developer mode then click "Load unpacked" to inst,all the addon from the `build/chrome` directory. That way you can click "Update" to re-install the add-on after its been rebuilt.
+
+Open the add-on preferences to select a Slack workspace and configure site match patterns.
 
 ## Browser compatibility
 
