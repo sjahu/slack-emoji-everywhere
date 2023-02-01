@@ -1,0 +1,35 @@
+{
+  "manifest_version": 3,
+  "name": "slack-emoji-everywhere",
+  "version": "0.0.1",
+  "description": "Bring slack emoji everywhere, where they belong",
+  "homepage_url": "https://github.com/sjahu/slack-emoji-everywhere",
+  "content_scripts": [
+    {
+      "matches": [
+        "https://app.slack.com/*" // to extract slack auth info from localstorage
+      ],
+      "js": [
+        "slack.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "options_ui": {
+    "page": "options.html"
+  },
+  "permissions": [
+    "storage", // to persist settings
+    "scripting" // to programmatically inject content scripts only when necessary
+  ],
+  "host_permissions": [
+    "https://edgeapi.slack.com/*" // to make requests to the Slack API in spite of the same-origin policy
+ // to allow the user to grant access to other site data on a per-site basis
+  ], // note: host_permissions are opt-in by default in manifest v3; in v2 the <all_urls> pattern was in optional_permissions
+  "optional_host_permissions": [
+    "<all_urls>"
+  ]
+}

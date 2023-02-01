@@ -1,3 +1,4 @@
+import { browser } from "./lib/browser_polyfill.js";
 import { get_user_added_match_patterns } from "./lib/optional_host_permissions.js";
 import * as emojiCache from "./lib/emoji_url_cache.js";
 import * as emojiApi from "./lib/emoji_api.js";
@@ -14,16 +15,18 @@ getTeam().then((team) => {
   }
 });
 
-browser.runtime.onMessage.addListener(async (request) => {
-  const team = await getTeam();
-  if (team) {
-    switch (request.type) {
-      case "getEmoji":
-        return handleGetEmoji(team, request.emojiNames);
-      case "searchEmoji":
-        return handleSearchEmoji(team, request.query);
+browser.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+  getTeam().then((team) => {
+    if (team) {
+      switch (message.type) {
+        case "getEmoji":
+          handleGetEmoji(team, message.emojiNames).then(sendResponse);
+        case "searchEmoji":
+          handleSearchEmoji(team, message.query).then(sendResponse);
+      }
     }
-  }
+  });
+  return true;
 });
 
 async function getTeam() {

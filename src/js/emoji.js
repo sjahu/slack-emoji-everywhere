@@ -1,3 +1,5 @@
+import { browser } from "./lib/browser_polyfill.js";
+
 const EMOJI_REGEX = /:(?<name>[a-z0-9_\-'+]{1,100}):/g;
 const PARTIAL_EMOJI_REGEX = /:(?<name>[a-z0-9_\-'+]{1,100})/g;
 

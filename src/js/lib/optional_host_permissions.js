@@ -1,3 +1,5 @@
+import { browser } from "./browser_polyfill.js";
+
 export function get_user_added_match_patterns() {
   return browser.permissions.getAll().then((permissions) => {
     let manifest = browser.runtime.getManifest();

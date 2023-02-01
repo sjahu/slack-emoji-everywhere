@@ -1,3 +1,5 @@
+import { browser } from "./lib/browser_polyfill.js";
+
 // Copy Slack's config to the extension's local storage so the other extension scripts can read it
 browser.storage.local.set({ slackConfig: JSON.parse(localStorage.localConfig_v2) });
 

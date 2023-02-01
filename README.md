@@ -25,7 +25,7 @@ This extension uses a signed-in Slack workspace to automagically download emoji 
 
 ## Browser compatibility
 
-Currently only compatible with Firefox, but I believe all that needs to be done to get it working with Chrome is add a polyfill to choose the [`browser` or `chrome` namespace](https://bugs.chromium.org/p/chromium/issues/detail?id=798169) as appropriate.
+Compatible with with Firefox and Chrome/Chromium. Getting it working on other browsers that support WebExtensions shouldn't be too hard...
 
 ## Demo
 

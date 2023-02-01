@@ -53,3 +53,7 @@
   padding-left: 4px;
   padding-top: 2px;
 }
+
+.slack-emoji-everywhere-picker ::-webkit-scrollbar {
+  display: none; /* hide Chrome's ugly scrollbars */
+}
