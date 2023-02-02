@@ -1,6 +1,7 @@
 import { browser } from "./lib/browser_polyfill.js";
 import { get_user_added_match_patterns } from "./lib/optional_host_permissions.js";
 import * as emojiCache from "./lib/emoji_url_cache.js";
+import { registerContentScripts } from "./lib/register_content_scripts.js";
 
 browser.storage.local.get(["slackConfig", "selectedTeamId"]).then((item) => {
   if (item.slackConfig) {
@@ -20,7 +21,7 @@ browser.storage.local.get(["slackConfig", "selectedTeamId"]).then((item) => {
           }
           input.addEventListener("change", () => {
             browser.storage.local.set({ selectedTeamId: input.value });
-            browser.runtime.reload();
+            window.location.reload();
           });
 
           let label = document.createElement("label");
@@ -85,7 +86,7 @@ get_user_added_match_patterns().then((patterns) => {
           input.addEventListener("click", () => {
             browser.permissions.remove({ origins: [input.dataset.pattern] }).then((success) => {
               if (success) {
-                browser.runtime.reload();
+                registerContentScripts().then(() => window.location.reload());
               }
             });
           });
@@ -104,7 +105,7 @@ document.querySelector("#match-pattern-add-button").addEventListener("click", ()
     browser.permissions.request({ origins: [document.querySelector("#match-pattern-input").value] }).then((success) => {
       if (success) {
         document.querySelector("#match-pattern-input").value = "";
-        browser.runtime.reload();
+        registerContentScripts().then(() => window.location.reload());
       }
     });
   } catch (error) {
@@ -121,8 +122,7 @@ document.querySelector("#match-pattern-input").addEventListener("keyup", (e) => 
 emojiCache.count().then((count) => document.querySelector("#emoji-cache-count").textContent = count);
 
 document.querySelector("#clear-cache-button").addEventListener("click", () => {
-  emojiCache.clear();
-  browser.runtime.reload();
+  emojiCache.clear().then(() => window.location.reload());
 });
 
 document.querySelector("#slack-link").addEventListener("click", () => {

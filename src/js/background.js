@@ -1,19 +1,9 @@
 import { browser } from "./lib/browser_polyfill.js";
-import { get_user_added_match_patterns } from "./lib/optional_host_permissions.js";
 import * as emojiCache from "./lib/emoji_url_cache.js";
 import * as emojiApi from "./lib/emoji_api.js";
+import { registerContentScripts } from "./lib/register_content_scripts.js";
 
 const CACHE_TTL = 7 * 24 * 60 * 60 * 1000; // Refresh emoji URLs older than this
-
-getTeam().then((team) => {
-  if (team) {
-    get_user_added_match_patterns().then((patterns) => {
-      if (team && patterns.length) {
-        registerContentScripts(patterns);
-      }
-    });
-  }
-});
 
 browser.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   getTeam().then((team) => {
@@ -27,6 +17,10 @@ browser.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     }
   });
   return true;
+});
+
+browser.runtime.onInstalled.addListener(() => {
+  registerContentScripts();
 });
 
 async function getTeam() {
@@ -92,27 +86,6 @@ async function fetchAndCacheEmojis(team, emojis) {
   } else {
     return {};
   }
-}
-
-function registerContentScripts(patterns) {
-  browser.scripting.registerContentScripts(
-    [
-      {
-        id: "emoji",
-        matches: patterns,
-        excludeMatches: [
-          "https://app.slack.com/*"
-        ],
-        js: [
-          "emoji.js"
-        ],
-        css: [
-          "emoji.css"
-        ],
-        runAt: "document_idle"
-      }
-    ]
-  );
 }
 
 async function handleSearchEmoji(team, query) {
