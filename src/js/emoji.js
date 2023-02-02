@@ -109,7 +109,7 @@ window.addEventListener("resize", handleCaretChange);
 document.addEventListener("scroll", handleCaretChange);
 
 function handleCaretChange() {
-  let [node, match, callback, x, y] = getBasicInputNode() || getContentEditableNode() || [];
+  let [node, match, callback, x, y] = getBasicInputNode() || getNormalSelectionNode();
 
   let existingPicker = getPicker();
 
@@ -178,15 +178,13 @@ function getBasicInputNode() {
   }
 }
 
-function getContentEditableNode() {
+function getNormalSelectionNode() {
   let node, match, callback, x, y;
 
   let range = window.getSelection().getRangeAt(0);
-  let selectedNode = range.endContainer;
+  node = range.endContainer;
 
-  if (selectedNode.nodeType == Node.TEXT_NODE && selectedNode.parentNode.isContentEditable) {
-    node = selectedNode;
-
+  if (node.nodeType == Node.TEXT_NODE && node.parentNode.isContentEditable) {
     if (range.collapsed) {
       match = getPartialEmojiNameAtChar(node.textContent, range.endOffset);
       callback = (emojiName) => {
@@ -203,9 +201,9 @@ function getContentEditableNode() {
       x = rect.x;
       y = rect.y;
     }
-
-    return [node, match, callback, x, y];
   }
+
+  return [node, match, callback, x, y]; // always returns a node
 }
 
 function getPartialEmojiNameAtChar(str, pos) {
