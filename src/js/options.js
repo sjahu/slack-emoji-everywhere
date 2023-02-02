@@ -69,7 +69,7 @@ get_user_added_match_patterns().then((patterns) => {
 
           let code = document.createElement("code");
           {
-            code.textContent = pattern.replace("<all_urls>", "&lt;all_urls&gt;");
+            code.textContent = pattern;
           }
 
           div.append(code);
