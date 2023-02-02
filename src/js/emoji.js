@@ -109,7 +109,11 @@ function handleCaretChange() {
     let parent = node;
     do {
       if (parent == existingPicker) {
-        return; // return if the selection changed because the user clicked on the picker
+        // return if the selection changed because the user clicked on the picker itself
+        // this is necessary because otherwise a selection change triggered by the user
+        // clicking on the picker might cause the picker to be deleted before the li's
+        // click handler can fire
+        return;
       }
     } while (parent = parent.parentElement);
   }
