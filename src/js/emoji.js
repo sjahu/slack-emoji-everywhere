@@ -337,7 +337,7 @@ function insertEmoji(match, emojiName) {
   let endSpaceExists = match.input[match.index + match[0].length] == " " || match.input[match.index + match[0].length + 1] == " ";
 
   return {
-    str: match.input.substring(0, match.index) + ":" + emojiName + (endColonExists ? "" : ":") + match.input.substring(match.index + match[0].length) + (endSpaceExists ? "" : " "), // new string
+    str: match.input.substring(0, match.index) + ":" + emojiName + (endColonExists ? "" : ":") + (endSpaceExists ? "" : " ") + match.input.substring(match.index + match[0].length), // new string
     pos: match.index + emojiName.length + 3 // new caret position (3 chars = 2x ':' chars plus 1x ' ')
   };
 }
