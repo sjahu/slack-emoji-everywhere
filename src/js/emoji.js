@@ -57,8 +57,6 @@ function processNodes(nodes) {
   }
 
   if (emojiNames.size) {
-    // TODO: chunk emoji listing API calls
-    //       there doesn't appear to be a limit on the number of emojis per call, but there's a 10 000 byte limit on the size of the request body
     browser.runtime.sendMessage({ type: "getEmoji", emojiNames: [...emojiNames] }).then((emojiUrls) => {
       for (const node of nodes) {
         if (![...node.textContent.matchAll(EMOJI_REGEX)].filter((match) => emojiUrls[match.groups.name]).length) {
