@@ -139,7 +139,7 @@ function handleCaretChange() {
     existingPicker.emojiPickerMatch.index == match.index &&
     existingPicker.emojiPickerMatch.input == match.input
   ) {
-    setPickerPosition(existingPicker, x, y);
+    setPickerPosition(existingPicker, x, y); // necessary for resize and scroll events
     return;
   }
 
