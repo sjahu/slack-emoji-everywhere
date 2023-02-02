@@ -96,6 +96,17 @@ function processNodes(nodes) {
 }
 
 window.addEventListener("selectionchange", handleCaretChange, { capture: true });
+if (!window.browser) { // detect Chrome
+  window.addEventListener( // Chrome doesn't appear to fire the selectionchange event when deleting
+    "input", // it wouldn't be a huge deal to just always add a simple handler for "input", too
+    (e) => { // but it would waste some time since many events would be (partially) processesed twice
+      if (e.inputType == "deleteContentBackward" || e.inputType == "deleteContentForward") {
+        handleCaretChange();
+      }
+    },
+    { capture: true }
+  );
+}
 window.addEventListener("resize", handleCaretChange);
 document.addEventListener("scroll", handleCaretChange);
 
