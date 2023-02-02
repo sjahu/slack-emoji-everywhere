@@ -100,8 +100,7 @@ window.addEventListener("resize", handleCaretChange);
 document.addEventListener("scroll", handleCaretChange);
 
 function handleCaretChange() {
-  let range = window.getSelection().getRangeAt(0);
-  let node = range.endContainer;
+  let [node, match, callback, x, y] = getBasicInputNode() || getContentEditableNode() || [];
 
   let existingPicker = getPicker();
 
@@ -116,48 +115,6 @@ function handleCaretChange() {
         return;
       }
     } while (parent = parent.parentElement);
-  }
-
-  let match, callback, x, y;
-
-  if (node.nodeType == Node.TEXT_NODE && node.parentNode.isContentEditable) {
-    if (range.collapsed) {
-      match = getPartialEmojiNameAtChar(node.textContent, range.endOffset);
-      callback = (emojiName) => {
-        let result = insertEmoji(match, emojiName);
-        node.textContent = result.str;
-        let newSelection = window.getSelection();
-        let newRange = document.createRange();
-        newRange.setStart(node, result.pos);
-        newRange.setEnd(node, result.pos);
-        newSelection.removeAllRanges();
-        newSelection.addRange(newRange);
-      };
-      let rect = range.getClientRects()[0];
-      x = rect.x;
-      y = rect.y;
-    }
-  } else if (
-    node.nodeType == Node.ELEMENT_NODE &&
-    (
-      node.nodeName == "TEXTAREA" ||
-      (node.nodeName == "INPUT" && node.getAttribute("type") == "text")
-    )
-  ) {
-    if (node.selectionEnd == node.selectionStart) {
-      match = getPartialEmojiNameAtChar(node.value, node.selectionEnd);
-      callback = (emojiName) => {
-        let result = insertEmoji(match, emojiName);
-        node.value = result.str;
-        node.focus();
-        node.selectionStart = result.pos;
-        node.selectionEnd = result.pos;
-      };
-
-      let rect = node.getBoundingClientRect();
-      x = rect.x + rect.width; // TODO: you can't get an exact x,y caret position from a textarea or input but apparently
-      y = rect.y; // you can create an identically styled invisible div and get the caret position from that element
-    }
   }
 
   if (!match) {
@@ -183,6 +140,63 @@ function handleCaretChange() {
       existingPicker?.remove();
     }
   });
+}
+
+function getBasicInputNode() {
+  let node, match, callback, x, y;
+
+  let activeElement = document.activeElement;
+
+  if (activeElement.tagName == "TEXTAREA" || (activeElement.tagName == "INPUT" && activeElement.getAttribute("type") == "text")) {
+    node = activeElement;
+
+    if (node.selectionEnd == node.selectionStart) {
+      match = getPartialEmojiNameAtChar(node.value, node.selectionEnd);
+      callback = (emojiName) => {
+        let result = insertEmoji(match, emojiName);
+        node.value = result.str;
+        node.focus();
+        node.selectionStart = result.pos;
+        node.selectionEnd = result.pos;
+      };
+
+      let rect = node.getBoundingClientRect();
+      x = rect.x + rect.width; // TODO: you can't get an exact x,y caret position from a textarea or input but apparently
+      y = rect.y; // you can create an identically styled invisible div and get the caret position from that element
+    }
+
+    return [node, match, callback, x, y];
+  }
+}
+
+function getContentEditableNode() {
+  let node, match, callback, x, y;
+
+  let range = window.getSelection().getRangeAt(0);
+  let selectedNode = range.endContainer;
+
+  if (selectedNode.nodeType == Node.TEXT_NODE && selectedNode.parentNode.isContentEditable) {
+    node = selectedNode;
+
+    if (range.collapsed) {
+      match = getPartialEmojiNameAtChar(node.textContent, range.endOffset);
+      callback = (emojiName) => {
+        let result = insertEmoji(match, emojiName);
+        node.textContent = result.str;
+        let newSelection = window.getSelection();
+        let newRange = document.createRange();
+        newRange.setStart(node, result.pos);
+        newRange.setEnd(node, result.pos);
+        newSelection.removeAllRanges();
+        newSelection.addRange(newRange);
+      };
+      let rect = range.getClientRects()[0];
+      x = rect.x;
+      y = rect.y;
+    }
+
+    return [node, match, callback, x, y];
+  }
 }
 
 function getPartialEmojiNameAtChar(str, pos) {
