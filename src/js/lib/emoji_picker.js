@@ -1,7 +1,7 @@
 import { browser } from "./browser_polyfill.js";
 import { EMOJI_REGEX } from "./shared_regex.js";
 
-const PARTIAL_EMOJI_REGEX = /:(?<name>[a-z0-9_\-'+]{1,100})/g;
+const PARTIAL_EMOJI_REGEX = /:(?<name>[a-z0-9_\-'+]{1,100})/ig;
 
 export function handleCaretChange() {
   let [node, match, callback, x, y] = getBasicInputNode() || getNormalSelectionNode();
