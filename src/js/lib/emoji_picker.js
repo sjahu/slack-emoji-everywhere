@@ -85,6 +85,15 @@ function getNormalSelectionNode() {
       callback = (emojiName) => {
         let result = insertEmoji(match, emojiName);
         node.textContent = result.str;
+
+        if (!window.browser) { // detect Chrome
+          // if the last character in the node is a space, replace it with a non-breaking space
+          // otherwise, Chrome ignores it. If you keep typing in the node, the nbsp is replaced
+          // with a normal space. very weird.
+          // I think this is the same issue: https://github.com/yabwe/medium-editor/issues/1165
+          node.textContent = node.textContent.replace(/\u0020$/, "\u00A0");
+        }
+
         let newSelection = window.getSelection();
         let newRange = document.createRange();
         newRange.setStart(node, result.pos);
