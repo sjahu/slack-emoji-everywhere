@@ -26,7 +26,15 @@ browser.runtime.onInstalled.addListener(() => {
 });
 
 async function getTeam() {
-  let item = await browser.storage.local.get(["slackConfig", "selectedTeamId"]);
+  let item = await browser.storage.local.get(["slackConfig", "selectedTeamId", "customApiUrl", "customApiToken"]);
+
+  if (item.selectedTeamId == "slack-emoji-everywhere-custom") {
+    return {
+      token: item.customApiToken,
+      customApiUrl: item.customApiUrl,
+    };
+  }
+
   return item.slackConfig?.teams[item.selectedTeamId];
 }
 

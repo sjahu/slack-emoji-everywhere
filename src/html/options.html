@@ -65,13 +65,15 @@
     }
 
     #match-pattern-add-button,
-    .match-pattern-delete-button {
+    .match-pattern-delete-button,
+    .custom-api-save-button {
       width: 75px;
       margin-left: 8px;
     }
 
     #match-pattern-input,
-    #match-pattern-add-button {
+    #match-pattern-add-button,
+    .custom-api-save-button {
       display: inline-block;
     }
 
@@ -95,6 +97,17 @@
     </div>
     <p id="workspaces-missing">Missing the workspace you're looking for? Make sure you're <button id="slack-link">signed
       in to Slack</button>, then refresh this page.</p>
+
+    <h3>Custom emoji server</h3>
+    <input type="radio"
+           name="workspace"
+           id="slack-emoji-everywhere-custom"
+           value="slack-emoji-everywhere-custom">
+    <label for="slack-emoji-everywhere-custom">
+      <input type="text" id="custom-api-url" placeholder="https://example.com/api/">
+      <input type="text" id="custom-api-token" placeholder="my-secret-token">
+      <input type="button" id="custom-api-save-button" value="Save">
+    </label>
 
     <h2>Emojification Targets</h2>
     <p>Specify which sites to inject custom emoji into using <a

@@ -63,7 +63,9 @@ export async function search(team, query) {
 }
 
 function makeUrl(team, path) {
-  if (team.enterprise_id) {
+  if (team.customApiUrl) {
+    return `${team.customApiUrl.replace(/\/$/, "")}/emojis/${path}`;
+  } else if (team.enterprise_id) {
     return `https://edgeapi.slack.com/cache/${team.enterprise_id}/${team.id}/emojis/${path}`;
   } else {
     return `https://edgeapi.slack.com/cache/${team.id}/emojis/${path}`;

@@ -3,7 +3,7 @@ import { get_user_added_match_patterns } from "./lib/optional_host_permissions.j
 import * as emojiCache from "./lib/emoji_url_cache.js";
 import { registerContentScripts } from "./lib/register_content_scripts.js";
 
-browser.storage.local.get(["slackConfig", "selectedTeamId"]).then((item) => {
+browser.storage.local.get(["slackConfig", "selectedTeamId", "customApiUrl", "customApiToken"]).then((item) => {
   if (item.slackConfig) {
     let teams = Object.values(item.slackConfig.teams).sort((a, b) => a.name.localeCompare(b.name));
     if (teams.length) {
@@ -19,10 +19,6 @@ browser.storage.local.get(["slackConfig", "selectedTeamId"]).then((item) => {
           if (team.id === item.selectedTeamId) {
             input.setAttribute("checked", "");
           }
-          input.addEventListener("change", () => {
-            browser.storage.local.set({ selectedTeamId: input.value });
-            window.location.reload();
-          });
 
           let label = document.createElement("label");
           {
@@ -56,6 +52,25 @@ browser.storage.local.get(["slackConfig", "selectedTeamId"]).then((item) => {
       document.querySelector("#workspace-inputs").replaceChildren(ul);
     }
   }
+
+  if ("slack-emoji-everywhere-custom" === item.selectedTeamId) {
+    document.querySelector("#slack-emoji-everywhere-custom").setAttribute("checked", "");
+  }
+  document.querySelector("#custom-api-url").value = item.customApiUrl || "";
+  document.querySelector("#custom-api-token").value = item.customApiToken || "";
+  document.querySelector("#custom-api-save-button").addEventListener("click", () => {
+    browser.storage.local.set({
+      customApiUrl: document.querySelector("#custom-api-url").value,
+      customApiToken: document.querySelector("#custom-api-token").value,
+    });
+  });
+
+  document.querySelectorAll("input[name='workspace']").forEach((input) => {
+    input.addEventListener("change", () => {
+      browser.storage.local.set({ selectedTeamId: input.value });
+      window.location.reload();
+    });
+  });
 });
 
 get_user_added_match_patterns().then((patterns) => {
