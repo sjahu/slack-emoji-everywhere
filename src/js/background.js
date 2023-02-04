@@ -11,8 +11,10 @@ browser.runtime.onMessage.addListener((message, _sender, sendResponse) => {
       switch (message.type) {
         case "getEmoji":
           handleGetEmoji(team, message.emojiNames).then(sendResponse);
+          break;
         case "searchEmoji":
           handleSearchEmoji(team, message.query).then(sendResponse);
+          break;
       }
     }
   });
