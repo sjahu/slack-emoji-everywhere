@@ -26,14 +26,12 @@ new MutationObserver((mutations) => {
 window.addEventListener("selectionchange", emojiPicker.handleCaretChange, { capture: true });
 window.addEventListener("resize", emojiPicker.handleCaretChange);
 document.addEventListener("scroll", emojiPicker.handleCaretChange);
-if (!globalThis.browser) { // detect Chrome
-  window.addEventListener( // Chrome doesn't appear to fire the selectionchange event when deleting
-    "input", // it wouldn't be a huge deal to just always add a simple handler for "input", too
-    (e) => { // but it would waste some time since many events would be (partially) processesed twice
-      if (e.inputType == "deleteContentBackward" || e.inputType == "deleteContentForward") {
-        emojiPicker.handleCaretChange();
-      }
-    },
-    { capture: true }
-  );
-}
+window.addEventListener( // Chrome doesn't appear to fire the selectionchange event when backspacing or deleting
+  "input", // and Firefox doesn't fire when deleting
+  (e) => {
+    if ((e.inputType == "deleteContentBackward" && !globalThis.browser) || e.inputType == "deleteContentForward") {
+      emojiPicker.handleCaretChange();
+    }
+  },
+  { capture: true }
+);
