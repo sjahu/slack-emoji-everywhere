@@ -67,8 +67,7 @@ browser.storage.local.get(["slackConfig", "selectedTeamId", "customApiUrl", "cus
 
   document.querySelectorAll("input[name='workspace']").forEach((input) => {
     input.addEventListener("change", () => {
-      browser.storage.local.set({ selectedTeamId: input.value });
-      window.location.reload();
+      browser.storage.local.set({ selectedTeamId: input.value }).then(() => window.location.reload());
     });
   });
 });
