@@ -86,7 +86,7 @@ function getNormalSelectionNode() {
         let result = insertEmoji(match, emojiName);
         node.textContent = result.str;
 
-        if (!window.browser) { // detect Chrome
+        if (!globalThis.browser) { // detect Chrome
           // if the last character in the node is a space, replace it with a non-breaking space
           // otherwise, Chrome ignores it. If you keep typing in the node, the nbsp is replaced
           // with a normal space. very weird.
