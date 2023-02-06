@@ -57,3 +57,7 @@
 .slack-emoji-everywhere-picker ::-webkit-scrollbar {
   display: none; /* hide Chrome's ugly scrollbars */
 }
+
+.slack-emoji-everywhere-picker.hidden {
+  display: none;
+}

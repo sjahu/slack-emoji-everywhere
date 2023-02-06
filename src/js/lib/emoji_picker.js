@@ -6,12 +6,12 @@ const PARTIAL_EMOJI_REGEX = /:(?<name>[a-z0-9_\-'+]{1,100})/ig;
 export function handleCaretChange() {
   let [node, match, callback, x, y] = getBasicInputNode() || getNormalSelectionNode();
 
-  let existingPicker = getPicker();
+  let picker = getPicker();
 
-  if (existingPicker) {
+  if (picker) {
     let parent = node;
     do {
-      if (parent == existingPicker) {
+      if (parent == picker) {
         // return if the selection changed because the user clicked on the picker itself
         // this is necessary because otherwise a selection change triggered by the user
         // clicking on the picker might cause the picker to be deleted before the li's
@@ -22,26 +22,32 @@ export function handleCaretChange() {
   }
 
   if (!match) {
-    existingPicker?.remove();
+    picker?.remove();
     return;
   }
 
-  if (existingPicker &&
-    existingPicker.emojiPickerNode == node &&
-    existingPicker.emojiPickerMatch[0] == match[0] &&
-    existingPicker.emojiPickerMatch.index == match.index &&
-    existingPicker.emojiPickerMatch.input == match.input
+  if (picker &&
+    picker.emojiPickerNode == node &&
+    picker.emojiPickerMatch[0] == match[0] &&
+    picker.emojiPickerMatch.index == match.index &&
+    picker.emojiPickerMatch.input == match.input
   ) {
-    setPickerPosition(existingPicker, x, y); // necessary for resize and scroll events
+    setPickerPosition(picker, x, y); // necessary for resize and scroll events
     return;
   }
+
+  picker ||= makeEmptyPicker();
+
+  picker.emojiPickerNode = node; // save these values before making the async search call
+  picker.emojiPickerMatch = match; // so we can avoid duplicating work in case another event
+  picker.emojiPickerCallback = callback; // is triggered for the same caret position
 
   browser.runtime.sendMessage({ type: "searchEmoji", query: match.groups.name }).then((results) => {
     if (results.length) {
-      let picker = makeEmojiPicker(results, node, match, callback);
+      populatePicker(picker, results);
       setPickerPosition(picker, x, y);
     } else {
-      existingPicker?.remove();
+      picker?.remove();
     }
   });
 }
@@ -124,62 +130,60 @@ function getPartialEmojiNameAtChar(str, pos) {
   return newEmojiMatch;
 }
 
-function makeEmojiPicker(emojis, node, match, callback) {
-  let picker = getPicker() || document.createElement("div");
+function makeEmptyPicker() {
+  let picker = document.createElement("div");
   {
-    picker.emojiPickerNode = node;
-    picker.emojiPickerMatch = match;
-    picker.emojiPickerCallback = callback;
-
-    picker.setAttribute("class", "slack-emoji-everywhere-picker");
-
-    let div = picker.querySelector("div") || document.createElement("div");
-    {
-      let ul = document.createElement("ul");
-      {
-        ul.append(...emojis.map((emoji) => {
-          let li = document.createElement("li");
-          {
-            li.setAttribute("data-name", emoji.name);
-
-            let img = document.createElement("img");
-            {
-              img.setAttribute("src", emoji.value);
-              img.setAttribute("class", "slack-emoji-everywhere");
-            }
-
-            let span = document.createElement("span");
-            {
-              span.append(":\u200B", emoji.name, "\u200B:"); // zero-width space chars so we don't emojify these labels
-            }
-
-            li.append(img, span);
-
-            li.addEventListener("click", (e) => {
-              e.preventDefault();
-              picker.emojiPickerCallback(li.getAttribute("data-name"));
-              picker.remove();
-            });
-
-            li.addEventListener("mouseenter", (e) => {
-              li.parentNode.childNodes.forEach((node) => node.removeAttribute("selected"));
-              li.setAttribute("selected", "");
-            })
-          }
-          return li;
-        }));
-
-        ul.children[0]?.setAttribute("selected", "");
-      }
-      div.replaceChildren(ul);
-    }
-
-    picker.replaceChildren(div);
+    picker.classList.add("slack-emoji-everywhere-picker", "hidden");
+    document.body.append(picker);
   }
 
-  document.body.append(picker);
-
   return picker;
+}
+
+function populatePicker(picker, emojis) {
+  let div = picker.querySelector("div") || document.createElement("div");
+  {
+    let ul = document.createElement("ul");
+    {
+      ul.append(...emojis.map((emoji) => {
+        let li = document.createElement("li");
+        {
+          li.setAttribute("data-name", emoji.name);
+
+          let img = document.createElement("img");
+          {
+            img.setAttribute("src", emoji.value);
+            img.setAttribute("class", "slack-emoji-everywhere");
+          }
+
+          let span = document.createElement("span");
+          {
+            span.append(":\u200B", emoji.name, "\u200B:"); // zero-width space chars so we don't emojify these labels
+          }
+
+          li.append(img, span);
+
+          li.addEventListener("click", (e) => {
+            e.preventDefault();
+            picker.emojiPickerCallback(li.getAttribute("data-name"));
+            picker.remove();
+          });
+
+          li.addEventListener("mouseenter", (e) => {
+            li.parentNode.childNodes.forEach((node) => node.removeAttribute("selected"));
+            li.setAttribute("selected", "");
+          })
+        }
+        return li;
+      }));
+
+      ul.children[0]?.setAttribute("selected", "");
+    }
+    div.replaceChildren(ul);
+  }
+
+  picker.replaceChildren(div);
+  picker.classList.remove("hidden");
 }
 
 window.addEventListener("keydown", (e) => {
