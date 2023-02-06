@@ -55,7 +55,8 @@
 }
 
 .slack-emoji-everywhere-picker ::-webkit-scrollbar {
-  display: none; /* hide Chrome's ugly scrollbars */
+  /* hide Chrome's ugly scrollbars */
+  display: none;
 }
 
 .slack-emoji-everywhere-picker.hidden {

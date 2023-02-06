@@ -20,7 +20,7 @@ export async function registerContentScripts() {
     persistAcrossSessions: true
   };
 
-  let registeredScripts = await browser.scripting.getRegisteredContentScripts({ ids: ["emoji"]});
+  let registeredScripts = await browser.scripting.getRegisteredContentScripts({ ids: ["emoji"] });
 
   if (patterns.length) {
     if (registeredScripts.length) {
@@ -30,7 +30,7 @@ export async function registerContentScripts() {
     }
   } else {
     if (registeredScripts.length) {
-      browser.scripting.unregisterContentScripts({ ids: ["emoji"]});
+      browser.scripting.unregisterContentScripts({ ids: ["emoji"] });
     }
   }
 }
