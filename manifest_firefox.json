@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "slack-emoji-everywhere",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Bring slack emoji everywhere, where they belong",
   "homepage_url": "https://github.com/sjahu/slack-emoji-everywhere",
   "browser_specific_settings": {
