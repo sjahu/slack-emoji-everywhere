@@ -1,7 +1,5 @@
 # slack-emoji-everywhere
 
-**⚠️ WIP: This is a work in progress and is not quite ready for general use.**
-
 Wouldn't it be great if you could use Slack emoji on Workplace by Meta, or any other site? Yes, yes it would.
 
 This extension uses a signed-in Slack workspace to automagically download emoji and injects them into non-Slack webpages in place of text `:emoji:` tokens.
@@ -67,11 +65,15 @@ Configuration:
 
 ![](demo3.png)
 
+## Custom API support
+
+Can't or don't want to use Slack to host custom emoji? `slack-emoji-everywhere` supports fetching emoji info from a custom API server. See [custom-api.md](custom-api.md).
+
 ## To do
 
-There are a few things left to do to make this usable, some of which are tagged with `TODO` in the code.
-
-Other ideas:
-
 - Add support for native emoji (the Slack client downloads a big blob of all their names rather than getting them through the search API).
-- Add support for specifying the URL of a non-Slack server implementing Slack's emoji API (e.g. to host your own emoji collection).
+  - I haven't implemented this yet because it requires some thinking about the UX.
+    - Should the emoji picker insert real Unicode emoji characters, or just the human-readable `::` names?
+    - In the first case, would users be confused by having two types of emoji that are treated differently?
+    - In the second, would this too much degrade the experience of people _not_ using the extension?
+  - At the moment, I'm inclined to just not touch native emoji at all and have users use their OS's native picker to type them. This keeps it perfectly clear which emoji are native and which are custom. Considering we don't have the luxury Slack has of being able to blur the lines between types, this seems like an acceptable balance. (On the other hand, users may find it annoying...)
